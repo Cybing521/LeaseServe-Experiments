@@ -201,6 +201,13 @@ axc.set_xlabel("missing top-10 results (of 5,000); right: p50", fontsize=8.2)
 axc.tick_params(axis="y", length=0)
 axc.text(g_leaks[0] / 2, yg[0], "584", ha="center", va="center", fontsize=6.8,
          color="#5A1A15")
+from matplotlib.patches import Patch as _Patch
+axc.legend(handles=[
+    _Patch(facecolor=C_NEUTRAL, edgecolor="black", lw=0.3, label="missing"),
+    _Patch(facecolor="#E8B4AF", edgecolor="#8C2F27", lw=0.4, label="leaked"),
+], loc="center right", bbox_to_anchor=(0.99, 0.50), frameon=True, framealpha=0.92,
+   edgecolor="#cccccc", fontsize=6.4, handlelength=0.85, borderpad=0.22,
+   labelspacing=0.25)
 panel_label(axc, "(c)", dx=-0.14, dy=1.10)
 
 # ---------------------------------------------------------------- (d) 10M
