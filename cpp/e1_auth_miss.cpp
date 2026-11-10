@@ -134,13 +134,18 @@ int main(int argc, char** argv) {
         roles[r] = std::move(*std::make_unique<Role>(std::move(R)));
     }
 
-    const char* names[4] = {"no-cert", "cert-no-log", "cert+log", "version-eq"};
-    long auth_miss[4] = {0, 0, 0, 0}, falls[4] = {0, 0, 0, 0}, leaks[4] = {0, 0, 0, 0};
-    long short_count[4] = {0, 0, 0, 0}, returned_sum[4] = {0, 0, 0, 0};
-    long min_len[4] = {1000000, 1000000, 1000000, 1000000}, max_len[4] = {0, 0, 0, 0};
+    // The fifth entry is not a predicate but a control: the same version-equality
+    // rule read at pin == a, where it is allowed to use the graph.  It shows that
+    // the predicate has a passing branch; the other four read at pin = 1 > a.
+    const char* names[5] = {"no-cert", "cert-no-log", "cert+log", "version-eq",
+                            "version-eq@pin=a"};
+    long auth_miss[5] = {0, 0, 0, 0, 0}, falls[5] = {0, 0, 0, 0, 0}, leaks[5] = {0, 0, 0, 0, 0};
+    long short_count[5] = {0, 0, 0, 0, 0}, returned_sum[5] = {0, 0, 0, 0, 0};
+    long min_len[5] = {1000000, 1000000, 1000000, 1000000, 1000000}, max_len[5] = {0, 0, 0, 0, 0};
+    long pin_a_reads = 0, pin_a_exact = 0, pin_a_short = 0;
     long constructed = 0, top1_valid = 0;
 
-    std::vector<double> lat[4];
+    std::vector<double> lat[5];
 
     for (int q = 0; q < nq; ++q) {
         const int r = qroles[q];
@@ -223,11 +228,46 @@ int main(int argc, char** argv) {
             if (fallback) falls[arm]++;
             for (int d : got) if (!R.vis.count(d) && d != target) leaks[arm]++;
         }
+
+        // Control: version equality at pin == a.  V(r,0) = R.docs, the graph holds
+        // exactly that set, so the graph branch is legal and must be exact.
+        {
+            const auto t = Clock::now();
+            std::vector<int> got;
+            auto rs = R.h->searchKnn(qv, static_cast<size_t>(k) * mfac);
+            std::vector<std::pair<float, int>> c;
+            while (!rs.empty()) { c.emplace_back(rs.top().first, (int)rs.top().second); rs.pop(); }
+            std::sort(c.begin(), c.end());
+            for (auto& p : c) {
+                if (static_cast<int>(got.size()) >= k) break;
+                if (R.vis.count(p.second)) got.push_back(p.second);
+            }
+            lat[4].push_back(std::chrono::duration<double, std::milli>(Clock::now() - t).count());
+            ++pin_a_reads;
+            if (static_cast<int>(got.size()) < k) ++pin_a_short;
+            std::vector<std::pair<float, int>> d0;
+            d0.reserve(R.docs.size());
+            for (int doc : R.docs) d0.emplace_back(l2(base + static_cast<size_t>(doc) * dim, qv, dim), doc);
+            const size_t kk0 = std::min<size_t>(k, d0.size());
+            std::partial_sort(d0.begin(), d0.begin() + kk0, d0.end());
+            std::unordered_set<int> gs0(got.begin(), got.end());
+            bool same = static_cast<size_t>(got.size()) == kk0;
+            for (size_t i = 0; same && i < kk0; ++i) same = gs0.count(d0[i].second) > 0;
+            if (same) ++pin_a_exact;
+            const int len = static_cast<int>(got.size());
+            short_count[4] += (len < k);
+            returned_sum[4] += len;
+            if (len < min_len[4]) min_len[4] = len;
+            if (len > max_len[4]) max_len[4] = len;
+            for (int d : got) if (!R.vis.count(d)) leaks[4]++;
+        }
     }
 
     std::ofstream sm(outdir + "/summary.txt");
     sm << "e1 n=" << n << " nq=" << nq << " constructed=" << constructed << " top1_valid=" << top1_valid << " k=" << k << " K=" << K << " mfac=" << mfac << "\n";
-    for (int arm = 0; arm < 4; ++arm) {
+    sm << "pin_eq_a reads=" << pin_a_reads << " exact_topk=" << pin_a_exact
+       << " short=" << pin_a_short << "\n";
+    for (int arm = 0; arm < 5; ++arm) {
         sm << names[arm] << " auth_miss=" << auth_miss[arm]
            << " short=" << short_count[arm] << " min_len=" << min_len[arm]
            << " max_len=" << max_len[arm] << " returned=" << returned_sum[arm]

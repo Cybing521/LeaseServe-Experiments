@@ -1,0 +1,7 @@
+e1 n=200000 nq=100 constructed=29 top1_valid=29 k=10 K=10 mfac=15
+pin_eq_a reads=29 exact_topk=29 short=0
+no-cert auth_miss=29 short=0 min_len=10 max_len=10 returned=290 fallback=0 leaks=0 p50=0.194281 p95=0.243222
+cert-no-log auth_miss=29 short=0 min_len=10 max_len=10 returned=290 fallback=0 leaks=0 p50=0.099964 p95=0.144049
+cert+log auth_miss=0 short=0 min_len=10 max_len=10 returned=290 fallback=0 leaks=0 p50=0.085132 p95=0.115067
+version-eq auth_miss=0 short=0 min_len=10 max_len=10 returned=290 fallback=29 leaks=0 p50=1.22754 p95=3.14283
+version-eq@pin=a auth_miss=0 short=0 min_len=10 max_len=10 returned=290 fallback=0 leaks=0 p50=0.156463 p95=0.207463
