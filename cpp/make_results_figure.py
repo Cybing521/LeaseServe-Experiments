@@ -109,7 +109,7 @@ for s in axa.spines.values():
     s.set_visible(False)
 sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
 cb = fig.colorbar(sm, ax=axa, fraction=0.055, pad=0.02)
-cb.set_label("exact / lease speedup", fontsize=7.4, labelpad=2)
+cb.set_label("exact p50 / lease p50", fontsize=7.4, labelpad=2)
 cb.ax.tick_params(labelsize=7.0, length=1.8)
 cb.outline.set_linewidth(0.4)
 panel_label(axa, "(a)", dx=-0.06, dy=1.10)
