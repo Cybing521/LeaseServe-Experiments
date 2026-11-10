@@ -70,6 +70,7 @@ bundled. The archived `cmd.txt` files give the arguments.
 python3 mechanism/script_regression.py --bin ./lease_certified
 python3 mechanism/e0_contract_tests.py
 python3 mechanism/e0_certified_tests.py
+python3 mechanism/paired_bootstrap.py --lease <lat.txt> --base name=<lat.txt> --out bootstrap.json
 ```
 
 The regression script generates its own random data and runs the independent
