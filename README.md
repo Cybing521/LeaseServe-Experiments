@@ -19,6 +19,7 @@ cpp/                     C++ kernel, baseline drivers, ACL inputs
   acl/erbac200k/         roles.bin, qroles_10000.bin, qroles_all.bin
   third_party/hnswlib/   stock hnswlib headers (MIT)
 mechanism/               test and statistics scripts
+service/                 WAL sequencer and its lifecycle tests
 results/                 raw run outputs (summary.txt, cmd.txt, logs)
 scripts/                 reproduction shell scripts
 ```
