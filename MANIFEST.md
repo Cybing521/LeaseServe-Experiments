@@ -17,13 +17,12 @@ on the three hosts was `0caeb02f1cc236dbc1c97391dae37013`.
 | Host diagnosis (mfac, exact) | `results/ab_stream_official10k_20261109/diagnostics/` |
 | Budget guard (k=1000, phi=95%) | `results/ab_stream_official10k_20261109/budget_guard/` |
 | Curator incremental path (N sweep) | `results/curator_incremental_20261110/` |
+| Fig. 3 source JSON | `mechanism/results/arms_20261104/` |
 | OpenAlex ACL table | `results/oa_acl_20261107/` |
 | OpenAlex churn replay | `results/oa_replay_20261107/` |
 | SIFT10M / 768d records | `results/sift10m_*`, `results/real10m_768_20261107/`, `results/real768_1m_20261107/` |
 | Per-role table / certified matrix | `results/p4_20261107/`, `results/certified_20261108/` |
 | 10M sweep | `results/sweep10m_20261106/` |
-| ACORN online 1R+1W | `results/acorn_online_20261110/` |
-| Lease 1R+1W online | `results/online_lease_20261110/` |
 
 Key ratios (p50, same host): ACORN ef=32 1.20--1.26 (Xeon), 1.01 (Ryzen),
 1.38 (Gold); ACORN ef=256 6.91--7.12, 6.12, 7.34; Curator se=800 3.70--3.75,

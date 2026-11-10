@@ -1,1 +1,0 @@
-acorn_online n=200000 d=128 nq=10000 k=10 M=32 gamma=12 M_beta=32 ef=32 changes=50 threads=1 reads=10000 run_s=4.30068 p50=0.342914 p95=0.428832 p99=0.55261 updates=50 updates_per_s=11.6261 granted=26 revoked=24 leaked=0 missing=0 truth_checked=0

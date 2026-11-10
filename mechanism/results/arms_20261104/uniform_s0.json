@@ -1,0 +1,53 @@
+{
+  "n": 1000000,
+  "nq": 500,
+  "K": 10,
+  "changes": 200,
+  "seed": 0,
+  "build_s": 257.15,
+  "run_s": 13.28,
+  "groups": 29,
+  "memory": 4.601,
+  "arms": {
+    "static_nofilter": {
+      "reads": 500,
+      "leaks": 465,
+      "missing": 755,
+      "p50": 0.822,
+      "p95": 6.934,
+      "mem": 0.05
+    },
+    "static_filter": {
+      "reads": 500,
+      "leaks": 0,
+      "missing": 755,
+      "p50": 0.822,
+      "p95": 6.934,
+      "mem": 0.05
+    },
+    "incremental": {
+      "reads": 500,
+      "leaks": 0,
+      "missing": 1,
+      "p50": 6.189,
+      "p95": 22.725,
+      "mem": 0.05
+    },
+    "shared": {
+      "reads": 500,
+      "leaks": 0,
+      "missing": 4485,
+      "p50": 2.204,
+      "p95": 12.337,
+      "mem": 1.0
+    },
+    "partition": {
+      "reads": 500,
+      "leaks": 0,
+      "missing": 1944,
+      "p50": 25.895,
+      "p95": 52.866,
+      "mem": 4.601
+    }
+  }
+}
