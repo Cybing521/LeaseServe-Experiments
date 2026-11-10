@@ -32,7 +32,8 @@ g++ -O3 -march=native -std=c++17 -I cpp/third_party \
 ```
 
 Curator's incremental grant/revoke path is measured in
-`results/curator_incremental_20261110/` (driver and log).
+`results/curator_incremental_20261110/` (driver and log); ACORN's 1R+1W online path is in
+`results/acorn_online_20261110/`.
 
 The kernel uses AVX-512 for the exact scan; `-march=native` on a non-AVX-512 host
 builds the scalar fallback. A budget guard answers exactly when `phi > 1-1/rho` or
