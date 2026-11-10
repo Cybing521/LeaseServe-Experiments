@@ -24,6 +24,7 @@ Key ratios (p50, same host): ACORN ef=32 1.20--1.26 (Xeon), 1.01 (Ryzen),
 
 | Table IV (coverage arms) | `results/arms_cov_20261108/` |
 | Five-arm table, rotated order (3 seeds) | `results/arms_rotated_20261110/` |
+| Fixed-W sweep (budget x graph, 36 cells) | `results/fixed_w_20261110/` |
 | 1M certificate suite | `results/e0_certified_1m_20261109/` |
 | Return-length sweep | `results/e1_returnlen_20261109/` |
 | Top-1 counterexample + pin=a control | `results/e1_pin_a_20261110/` |
