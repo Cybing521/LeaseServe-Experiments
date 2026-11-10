@@ -23,6 +23,7 @@ Key ratios (p50, same host): ACORN ef=32 1.20--1.26 (Xeon), 1.01 (Ryzen),
 (Xeon) and 22.0 (Gold) instrumented, 23.1/14.5/22.0 precomputed.
 
 | Table IV (coverage arms) | `results/arms_cov_20261108/` |
+| Five-arm table, rotated order (3 seeds) | `results/arms_rotated_20261110/` |
 | 1M certificate suite | `results/e0_certified_1m_20261109/` |
 | Return-length sweep | `results/e1_returnlen_20261109/` |
 | Multi-writer | `results/multiwriter_20261107/` |

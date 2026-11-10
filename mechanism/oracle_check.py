@@ -192,8 +192,20 @@ def main():
         v.sort()
 
     if a.script:
-        # The script's epoch simulation must agree with the kernel's traces.
+        # The script's epoch simulation must agree with the kernel's traces: the
+        # kernel writes merges.txt, so compare the merge epochs it recorded with
+        # the ones the script implies.  A mismatch means the oracle is scoring a
+        # different state machine than the kernel ran.
         s_merges, lost = parse_script(a.script)
+        if a.merges:
+            sim = sorted(s_merges)
+            ker = sorted(merges)
+            if sim != ker:
+                raise SystemExit(
+                    "merge trace mismatch: script implies "
+                    f"{sim[:5]}{'...' if len(sim) > 5 else ''} "
+                    f"({len(sim)} merges), kernel recorded "
+                    f"{ker[:5]}{'...' if len(ker) > 5 else ''} ({len(ker)} merges)")
     else:
         s_merges, lost = [], set()
 
