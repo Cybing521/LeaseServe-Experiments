@@ -891,21 +891,25 @@ int main(int argc, char** argv) {
                                          : L->omega.load(std::memory_order_acquire);
             const bool covered = cert_on && (pred_eq ? (pin == L->a)
                                                      : (pin >= L->a && pin <= omega));
+            // Budget guard: a capped graph search would silently trade ann for
+            // latency. If rho*k/(1-phi) exceeds m_max, answer exactly instead.
+            const long W = static_cast<long>(L->g->cur_element_count.load()) +
+                           L->ring_n.load(std::memory_order_acquire);
+            const int live = std::max(1, st->live.load(std::memory_order_relaxed));
+            double phi = 1.0 - static_cast<double>(live) / std::max<long>(1, W);
+            if (phi < 0.0) phi = 0.0;
+            if (phi > 0.99) phi = 0.99;
+            const bool budget_ok =
+                phi <= 1.0 - 1.0 / static_cast<double>(mfac) &&
+                static_cast<double>(k) * mfac <= static_cast<double>(mmax);
 
-            if (cert_on && !covered) {
+            if (cert_on && (!covered || !budget_ok)) {
                 exact_visible(st, pin, qv, got);
                 g_cert_fallbacks.fetch_add(1, std::memory_order_relaxed);
                 g_exact_reads.fetch_add(1, std::memory_order_relaxed);
                 exact_read = true;
                 done = true;
             } else {
-                // m = min(m_max, ceil(rho*k/(1-phi))), phi = dead fraction of W.
-                const long W = static_cast<long>(L->g->cur_element_count.load()) +
-                               L->ring_n.load(std::memory_order_acquire);
-                const int live = std::max(1, st->live.load(std::memory_order_relaxed));
-                double phi = 1.0 - static_cast<double>(live) / std::max<long>(1, W);
-                if (phi < 0.0) phi = 0.0;
-                if (phi > 0.99) phi = 0.99;
                 long m = static_cast<long>(std::ceil(static_cast<double>(k) * mfac));
                 m = std::min<long>(m, mmax);
                 m = std::max<long>(m, k);

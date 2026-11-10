@@ -27,7 +27,8 @@ g++ -O3 -march=native -std=c++17 -I cpp/third_party \
 ```
 
 The kernel uses AVX-512 for the exact scan; `-march=native` on a non-AVX-512 host
-builds the scalar fallback.
+builds the scalar fallback. A budget guard answers exactly when `phi > 1-1/rho` or
+`rho*k > MMAX` (default 5000), rather than capping the graph search.
 
 ## Data
 

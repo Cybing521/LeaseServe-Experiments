@@ -15,6 +15,7 @@ on the three hosts was `0caeb02f1cc236dbc1c97391dae37013`.
 | Curator protocol control | `results/ab_stream_official10k_20261109/protocol_control/` |
 | Cold-role churn | `results/ab_stream_official10k_20261109/coldrole/` |
 | Host diagnosis (mfac, exact) | `results/ab_stream_official10k_20261109/diagnostics/` |
+| Budget guard (k=1000, phi=95%) | `results/ab_stream_official10k_20261109/budget_guard/` |
 
 Key ratios (p50, same host): ACORN ef=32 1.20--1.26 (Xeon), 1.01 (Ryzen),
 1.38 (Gold); ACORN ef=256 6.91--7.12, 6.12, 7.34; Curator se=800 3.70--3.75,
