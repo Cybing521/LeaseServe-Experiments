@@ -10,3 +10,9 @@ one reader + one writer, K=10, 3 seeds per host.
 
 ACORN online 1R+1W: Xeon 0.334--0.347, Ryzen 0.151. The lease matches ACORN at ef=32;
 ACORN ef=256 is 2.096 ms on the Xeon (6.2x the lease).
+
+## noverify
+
+`noverify/xeon.txt` and `noverify/ryzen.txt` are `SKIP_VERIFY=1` runs: read_s 7.37 s (Xeon)
+and 1.09 s (Ryzen), against 72.6/15.7 s with the offline oracle. The oracle is accounting, not
+service time; do not derive throughput from oracle-inclusive read_s.
