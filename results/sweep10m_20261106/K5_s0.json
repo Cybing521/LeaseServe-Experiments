@@ -1,0 +1,63 @@
+{
+  "protocol": "b1_weakenv_v1",
+  "scenario": "keepup",
+  "n": 10000000,
+  "dim": 128,
+  "k": 5,
+  "ef": 20,
+  "time_scale": 0.1,
+  "interval_eff_ms": 50.0,
+  "delivery": "steady",
+  "writers": 1,
+  "writer_mode": "disjoint",
+  "query_mix": "head",
+  "memory_factor": 1.453,
+  "update_events_per_s": 1.0,
+  "repair_mode": "batch_delta",
+  "admit": "stale_ok",
+  "rebuild_delta_log": "off",
+  "cache_ms": 200.0,
+  "outage_seq": [
+    60,
+    100
+  ],
+  "crash_at": 100,
+  "n_events": 200,
+  "build_s": 1072.5,
+  "run_s": 197.24,
+  "events_file": "/root/autodl-tmp/icde_cm/synth10m/stream_erbac_s0/events.jsonl",
+  "writer": {
+    "w0": {
+      "repair_ms_p50": 0.0,
+      "repair_ms_p95": 3586.251,
+      "repair_ms_max": 5046.868,
+      "commit_lag_ms_p50": 107538.455,
+      "commit_lag_ms_p95": 174708.539,
+      "commit_lag_ms_max": 183754.212,
+      "fresh_lag_ms_p50": null,
+      "fresh_lag_ms_p95": null,
+      "backlog_events": 0
+    }
+  },
+  "arms": {
+    "lease": {
+      "reads": 533,
+      "leaks": 0,
+      "boundary_leaks": 0,
+      "leak_rate": 0.0,
+      "exact_serve_frac": 0.0,
+      "missing": {
+        "total": 2471,
+        "auth": 2471,
+        "ann": 0,
+        "sel": 0
+      },
+      "p50": 4.574,
+      "p95": 224.852,
+      "p99": 302.688,
+      "staleness_v_p50": 0.0,
+      "staleness_v_p95": 15.0,
+      "post_recovery_exact_frac": null
+    }
+  }
+}

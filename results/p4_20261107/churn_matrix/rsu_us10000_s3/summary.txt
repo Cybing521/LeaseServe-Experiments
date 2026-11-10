@@ -1,0 +1,1 @@
+mode=delta_rsu n=1000000 dim=128 nq=500 k=10 K=10 mfac=15 delta_cap=4096 changes=200 threads=4 build_s=83.3124 qps_static=11240.5 qps_inc=7095.31 static_p50=0.347423 static_p95=0.412726 static_p99=0.543883 incr_p50=0.32948 incr_p95=0.392518 incr_p99=0.48418 static_leaks=0 inc_leaks=0 straddled=0 retries=32 fallbacks=4 returned=1080 pin_violations=0 inc_missing=2865

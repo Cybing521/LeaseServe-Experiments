@@ -1,0 +1,9 @@
+# context: cur_total from stdout (hist_rows / cur_total bound)
+T4_seed0           certified build_s=1.44965 reads=200 p50=0.123703 p95=0.150743 p99=0.209263 leaks=0 missing=0 auth=0 cert_fallbacks=0 merges=37 hist_rows=187 cur_total=50008 straddled=2 lease_retries=0
+T4_seed1           certified build_s=1.4548 reads=200 p50=0.1169 p95=0.146556 p99=0.225804 leaks=0 missing=0 auth=0 cert_fallbacks=0 merges=36 hist_rows=236 cur_total=49952 straddled=1 lease_retries=0
+T4literal_seed0    certified build_s=1.4555 reads=200 p50=0.124424 p95=0.163116 p99=0.197772 leaks=0 missing=0 auth=0 cert_fallbacks=0 merges=10 hist_rows=695 cur_total=50008 straddled=22 lease_retries=0
+T4literal_seed1    certified build_s=1.44843 reads=200 p50=0.121227 p95=0.160051 p99=0.178145 leaks=0 missing=0 auth=0 cert_fallbacks=0 merges=10 hist_rows=655 cur_total=49952 straddled=18 lease_retries=0
+T5_seed0           certified build_s=1.44301 reads=200 p50=0.136887 p95=0.172594 p99=0.213922 leaks=0 missing=0 auth=0 cert_fallbacks=0 merges=3 hist_rows=3488 cur_total=49978 straddled=18 lease_retries=0
+T5_seed1           certified build_s=1.44773 reads=200 p50=0.1332 p95=0.171973 p99=0.194726 leaks=0 missing=0 auth=0 cert_fallbacks=0 merges=4 hist_rows=3015 cur_total=49936 straddled=24 lease_retries=0
+T5b_seed0          certified build_s=1.45119 reads=200 p50=0.120948 p95=0.153158 p99=0.167745 leaks=0 missing=0 auth=0 cert_fallbacks=0 merges=20 hist_rows=1020 cur_total=49978 straddled=18 lease_retries=0
+T5b_seed1          certified build_s=1.45399 reads=200 p50=0.122841 p95=0.17035 p99=0.199164 leaks=0 missing=0 auth=0 cert_fallbacks=0 merges=20 hist_rows=1020 cur_total=49936 straddled=20 lease_retries=0

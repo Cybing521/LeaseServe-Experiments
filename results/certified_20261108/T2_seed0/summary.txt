@@ -1,0 +1,1 @@
+certified reads=200 p50=0.386606 p95=0.670199 p99=0.818318 leaks=0 missing=0 auth=0 cert_fallbacks=200 merges=0 hist_rows=1000 straddled=15

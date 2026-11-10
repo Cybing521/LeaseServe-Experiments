@@ -1,0 +1,2 @@
+./experiments/cpp/lease_certified data/sift1m/base.f32 data/sift1m/queries.f32 acl/uniform1000_1m/roles.bin acl/uniform1000_1m/qroles.bin 1000000 128 200 10 10 2000 4 0 results/certified_20261108/T4_seed0 15
+env CHANGE_US=500 DELTA_CAP=64 MERGE_EVERY=50 DROP_GRANT=0 CERT=1 WRITERS=1 MMAX=5000 WARMUP=1000

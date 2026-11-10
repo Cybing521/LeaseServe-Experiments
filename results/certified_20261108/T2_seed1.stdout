@@ -1,0 +1,1 @@
+certified build_s=1.44924 reads=200 p50=0.403398 p95=0.678014 p99=0.821644 leaks=0 missing=0 auth=0 cert_fallbacks=200 merges=0 hist_rows=1000 cur_total=49966 straddled=21 lease_retries=0

@@ -1,0 +1,83 @@
+{
+  "protocol": "b1_concurrent_v1",
+  "n": 1000000,
+  "dim": 128,
+  "k": 10,
+  "ef": 20,
+  "groups": 1,
+  "memory": 0.017,
+  "time_scale": 1.0,
+  "interval_eff_ms": -39999.0,
+  "n_events": 2000,
+  "build_s": 50.24,
+  "run_s": 40.04,
+  "events_file": "/tmp/oa_2000.jsonl",
+  "writer": {
+    "lease": {
+      "lag_queue_p50": 0.037,
+      "lag_queue_p95": 0.037,
+      "lag_queue_max": 0.037,
+      "backlog_events": 0
+    },
+    "partition": {
+      "lag_queue_p50": null,
+      "lag_queue_p95": null,
+      "lag_queue_max": null,
+      "backlog_events": 0
+    }
+  },
+  "arms": {
+    "shared": {
+      "reads": 60002,
+      "leaks": 0,
+      "leak_rate": 0.0,
+      "missing": {
+        "total": 596319,
+        "auth": 0,
+        "ann": 596319,
+        "sel": 0
+      },
+      "p50": 0.416,
+      "p95": 0.55
+    },
+    "static": {
+      "reads": 60002,
+      "leaks": 0,
+      "leak_rate": 0.0,
+      "missing": {
+        "total": 0,
+        "auth": 0,
+        "ann": 0,
+        "sel": 0
+      },
+      "p50": 0.105,
+      "p95": 0.16
+    },
+    "lease": {
+      "reads": 60002,
+      "leaks": 0,
+      "leak_rate": 0.0,
+      "missing": {
+        "total": 0,
+        "auth": 0,
+        "ann": 0,
+        "sel": 0
+      },
+      "p50": 0.135,
+      "p95": 0.201
+    },
+    "partition": {
+      "reads": 60002,
+      "leaks": 0,
+      "leak_rate": 0.0,
+      "missing": {
+        "total": 253268,
+        "auth": 0,
+        "ann": 253268,
+        "sel": 0
+      },
+      "p50": 0.231,
+      "p95": 0.3
+    }
+  }
+}

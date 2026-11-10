@@ -1,0 +1,1 @@
+n=990000 dim=128 nq=500 k=10 K=10 mfac=15 tomb_permille=0 tombstones=0 changes=0 build_s=14.4809 update_s=7.43e-07 static_p50=0.257948 static_p95=1.30182 incr_p50=0.26551 incr_p95=1.29376 static_leaks=0 inc_leaks=0 inc_missing=0

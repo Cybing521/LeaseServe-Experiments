@@ -1,0 +1,1 @@
+mode=epoch n=1000000 dim=128 nq=500 k=10 K=10 mfac=15 changes=200 threads=4 build_s=84.842 qps_static=10830.7 qps_inc=11181.5 static_p50=0.343698 static_p95=0.410244 incr_p50=0.353216 incr_p95=0.412829 static_leaks=0 inc_leaks=0 straddled=1 inc_missing=2893
