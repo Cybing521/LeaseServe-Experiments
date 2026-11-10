@@ -117,11 +117,24 @@ int main(int argc, char** argv) {
                     }
                     auto t1 = std::chrono::steady_clock::now();
                     lat.push_back(std::chrono::duration<double, std::milli>(t1 - t0).count());
+                    // Classify per the paper's definition, not by provenance:
+                    //   not in W                                  -> auth
+                    //   in W and in the exact top-m of W          -> ann (budget reached it)
+                    //   in W but outside that exact top-m         -> sel (the budget cut it)
+                    std::unordered_set<int> Cm;
+                    {
+                        std::vector<std::pair<float, int>> all;
+                        all.reserve(W.size());
+                        for (int d : W) all.emplace_back(l2(base + (size_t)d * dim, QV[q].data(), dim), d);
+                        const size_t mm = std::min<size_t>((size_t)m, all.size());
+                        std::partial_sort(all.begin(), all.begin() + mm, all.end());
+                        for (size_t i = 0; i < mm; ++i) Cm.insert(all[i].second);
+                    }
                     for (int d : truth[q]) {
                         if (gs.count(d)) continue;
                         ++miss;
-                        if (!W.count(d)) ++auth;          // W cannot supply it
-                        else if (std::find(granted.begin(), granted.end(), d) != granted.end()) ++ann;
+                        if (!W.count(d)) ++auth;
+                        else if (Cm.count(d)) ++ann;
                         else ++sel;
                     }
                 }
