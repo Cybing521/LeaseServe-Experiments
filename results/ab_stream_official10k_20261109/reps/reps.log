@@ -1,0 +1,16 @@
+rep1 lease :: certified build_s=14.2441 reads=10000 p50=0.251754 p95=0.302118 p99=0.637046 leaks=0 missing=46 auth=0 cert_fallbacks=0 wal_refused=0 unpromoted_refused=0 merges=0 hist_rows=100 cur_total=151758 replay_s=0 state_mismatch=-1 visible_total=-1 straddled=0 lease_retries=0 regrant_violations=0 live_mismatch=0 promotions=0 promote_ms=0
+rep1 stream SAME
+rep1 acorn32 :: ef=32 p50=0.315931 p95=0.384122 recall=0.95068 leak=0 rss_mb=681.117 build_s=42.2704
+rep1 acorn256 :: ef=256 p50=1.79185 p95=2.06028 recall=0.99939 leak=0 rss_mb=681.188 build_s=41.7374
+rep1 curator800 :: p50=0.932268 p95=1.14099 recall=0.97177 rss_mb=679 build_s=48.0508
+rep2 lease :: certified build_s=14.1387 reads=10000 p50=0.248247 p95=0.297752 p99=0.387785 leaks=0 missing=46 auth=0 cert_fallbacks=0 wal_refused=0 unpromoted_refused=0 merges=0 hist_rows=100 cur_total=151758 replay_s=0 state_mismatch=-1 visible_total=-1 straddled=0 lease_retries=0 regrant_violations=0 live_mismatch=0 promotions=0 promote_ms=0
+rep2 stream SAME
+rep2 acorn32 :: ef=32 p50=0.308337 p95=0.369442 recall=0.94994 leak=0 rss_mb=681.281 build_s=42.3138
+rep2 acorn256 :: ef=256 p50=1.72676 p95=1.97292 recall=0.99934 leak=0 rss_mb=681.148 build_s=42.032
+rep2 curator800 :: p50=0.929803 p95=1.15903 recall=0.97177 rss_mb=679 build_s=48.0444
+rep3 lease :: certified build_s=14.1699 reads=10000 p50=0.248841 p95=0.300787 p99=0.450522 leaks=0 missing=46 auth=0 cert_fallbacks=0 wal_refused=0 unpromoted_refused=0 merges=0 hist_rows=100 cur_total=151758 replay_s=0 state_mismatch=-1 visible_total=-1 straddled=0 lease_retries=0 regrant_violations=0 live_mismatch=0 promotions=0 promote_ms=0
+rep3 stream SAME
+rep3 acorn32 :: ef=32 p50=0.298893 p95=0.351482 recall=0.95105 leak=0 rss_mb=681.227 build_s=42.0723
+rep3 acorn256 :: ef=256 p50=1.71921 p95=1.976 recall=0.99948 leak=0 rss_mb=681.145 build_s=42.3347
+rep3 curator800 :: p50=0.932783 p95=1.14769 recall=0.97177 rss_mb=679 build_s=47.9651
+REPS_DONE

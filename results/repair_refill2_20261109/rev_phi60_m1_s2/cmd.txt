@@ -1,0 +1,2 @@
+AGGR=0 BURST=0 n=1000000 dim=128 nq=200 k=10 K=10 changes=30000 threads=4 seed=2 mfac=1 REFILL=1
+wrote results/repair_refill2_20261109/rev_phi60_m1_s2/summary.txt

@@ -1,0 +1,5 @@
+e1 n=200000 nq=200 constructed=180 top1_valid=180 k=10 K=10 mfac=15
+no-cert auth_miss=180 short=0 min_len=10 max_len=10 returned=1800 fallback=0 leaks=0 p50=0.123422 p95=0.151604
+cert-no-log auth_miss=180 short=0 min_len=10 max_len=10 returned=1800 fallback=0 leaks=0 p50=0.034074 p95=0.045746
+cert+log auth_miss=0 short=0 min_len=10 max_len=10 returned=1800 fallback=0 leaks=0 p50=0.02677 p95=0.035005
+version-eq auth_miss=0 short=0 min_len=10 max_len=10 returned=1800 fallback=180 leaks=0 p50=0.989006 p95=1.2624

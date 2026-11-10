@@ -1,0 +1,1 @@
+certified reads=200 p50=14.1978 p95=21.389 p99=22.506 leaks=0 missing=0 auth=0 cert_fallbacks=200 wal_refused=0 unpromoted_refused=0 merges=0 hist_rows=60 log_len=23 cur_total=772224 replay_s=0 state_mismatch=-1 visible_total=-1 straddled=0

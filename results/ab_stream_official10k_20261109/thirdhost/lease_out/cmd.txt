@@ -1,0 +1,2 @@
+./lease_bin $REPO/p0/base.f32 $REPO/thirdhost/experiments/results/ab_stream_official10k_20261109/queries10k_real.f32 $REPO/thirdhost/experiments/results/ab_stream_official10k_20261109/roles.bin $REPO/thirdhost/experiments/results/ab_stream_official10k_20261109/qroles_10000.bin 200000 128 10000 10 10 100 4 0 lease_out 15
+env CHANGE_US=500 DELTA_CAP=4096 MERGE_EVERY=0 DROP_GRANT=0 CERT=1 WRITERS=1 MMAX=5000 WARMUP=100 SELFCHECK=0

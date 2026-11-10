@@ -1,0 +1,1 @@
+n=200000 d=128 nq=10000 k=10 M=32 gamma=12 M_beta=32 ef=32 build_s=45.3851 p50=0.324421 p95=0.391793 recall=0.95209 leak=0 rss_mb=681.102 roles=100

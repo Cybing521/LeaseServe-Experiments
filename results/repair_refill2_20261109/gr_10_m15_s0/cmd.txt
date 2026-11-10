@@ -1,0 +1,2 @@
+AGGR=100 BURST=0 n=1000000 dim=128 nq=200 k=10 K=10 changes=5000 threads=4 seed=0 mfac=15 REFILL=1
+wrote results/repair_refill2_20261109/gr_10_m15_s0/summary.txt

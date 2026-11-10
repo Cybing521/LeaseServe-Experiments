@@ -1,0 +1,2 @@
+./bin/lease_ab base200k.f32 queries500.f32 acl/erbac200k/roles.bin acl/erbac200k/qroles_head10.bin 200000 128 200 10 10 0 4 2 ab/s2_c0 15
+env CHANGE_US=1 DELTA_CAP=4096 MERGE_EVERY=0 DROP_GRANT=0 CERT=1 WRITERS=1 MMAX=5000 WARMUP=0 SELFCHECK=0

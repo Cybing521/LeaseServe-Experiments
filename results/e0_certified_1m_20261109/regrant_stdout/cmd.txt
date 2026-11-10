@@ -1,0 +1,2 @@
+experiments/cpp/lease_certified_wt data/sift1m/base.f32 data/sift1m/queries_10k.f32 acl/erbac100_1m/roles.bin acl/erbac100_1m/qroles_head10.bin 1000000 128 200 10 10 2000 4 0 results/e0_certified_1m_wt/regrant_stdout 15
+env CHANGE_US=1 DELTA_CAP=4096 MERGE_EVERY=0 DROP_GRANT=0 CERT=1 WRITERS=1 MMAX=5000 WARMUP=1000 SELFCHECK=0

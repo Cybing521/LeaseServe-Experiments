@@ -1,0 +1,2 @@
+AGGR=0 BURST=0 n=1000000 dim=128 nq=200 k=10 K=10 changes=1000 threads=4 seed=2 mfac=15
+wrote results/arms_cov_20261108/revoke1000_s2/summary.txt

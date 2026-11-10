@@ -1,0 +1,18 @@
+mode=arms_compare n=1000000 dim=128 nq=200 k=10 K=10 changes=10000 threads=4
+exact reads=11200 p50=0.930842 p95=1.08874 p99=1.11834 leaks=0 missing=0 auth=0 returned=112000 fallbacks=0
+static reads=11200 p50=0.095991 p95=0.111791 p99=0.118002 leaks=0 missing=10196 auth=10196 returned=112000 fallbacks=0
+unversioned reads=11200 p50=0.094197 p95=0.11124 p99=0.117551 leaks=0 missing=0 auth=0 returned=112000 fallbacks=0
+lease reads=11200 p50=0.091963 p95=0.19102 p99=0.213862 leaks=0 missing=0 auth=0 returned=112000 fallbacks=0
+pin_no_delta reads=11200 p50=0.516773 p95=0.860239 p99=0.896777 leaks=0 missing=0 auth=0 returned=112000 fallbacks=11192
+cov_no_delta reads=11200 p50=0.307599 p95=0.612884 p99=0.689277 leaks=0 missing=0 auth=0 returned=112000 fallbacks=11192
+post g_pre reads=200 p50=0.10633 p95=0.126508 leaks=0 missing=0 auth=0 returned=2000
+post g_rep reads=200 p50=0.105999 p95=0.113483 leaks=0 missing=0 auth=0 returned=2000
+post g_rebuild reads=200 p50=0.109226 p95=0.119004 leaks=0 missing=0 auth=0 returned=2000
+post u_pre reads=200 p50=0.109546 p95=0.122581 leaks=0 missing=0 auth=0 returned=2000
+post u_rep reads=200 p50=0.108574 p95=0.115718 leaks=0 missing=0 auth=0 returned=2000
+post g_nodelta_rep reads=200 p50=0.040366 p95=0.046137 leaks=0 missing=356 auth=356 returned=2000
+health g_pre alive=50000 edges=800670 obsolete=0 isolated=0 unidir=56304
+health g_rep alive=50000 edges=848299 obsolete=0 isolated=0 unidir=8675
+health u_pre alive=60000 edges=974208 obsolete=0 isolated=0 unidir=72846
+health u_rep alive=60000 edges=1035213 obsolete=0 isolated=0 unidir=11841
+maintenance repair_ms_g=18.0493 repair_ms_u=22.3171 rebuild_ms=1764.56 roe_edges_g=0 rdn_edges_g=0 rue_edges_g=47629 roe_edges_u=0 rdn_edges_u=0 rue_edges_u=61005 refill_edges_g=0 refill_edges_u=0

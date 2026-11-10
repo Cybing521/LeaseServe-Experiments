@@ -1,0 +1,10 @@
+arm          exit  reads     p50  leaks missing cert_fb  verdict
+full            0    100   0.387      0       0       0  PASS
+versioneq       0    100  18.772      0       0     100  PASS
+nolog           0    100  84.086      0       0     100  PASS
+nocert          0    100   0.872      0       0       0  PASS
+full_hole       0    100   0.493      0       0      39  PASS
+nocert_hole     0    100   2.890      0       0       0  PASS
+regrant_window    0    100   0.411      0       0       0  PASS
+
+7/7 PASS

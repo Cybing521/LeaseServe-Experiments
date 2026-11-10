@@ -1,0 +1,92 @@
+# LeaseServe Experiments
+
+Experiment code, ACL inputs, and raw results for coverage-certified vector-search
+leases (ICDE 2027 submission). This repository contains no manuscript source or
+paper text.
+
+## Layout
+
+```
+cpp/                     C++ kernel, baseline drivers, ACL inputs
+  lease_certified.cpp    certified lease kernel (read path, writer, WAL, tests hooks)
+  acorn_acl.cpp          ACORN driver used for the 10k table
+  curator_acl.cpp        Curator driver used for the 10k table
+  gen_erbac_acl.py       ERBAC ACL generator
+  acl/erbac200k/         roles.bin, qroles_10000.bin, qroles_all.bin
+  third_party/hnswlib/   stock hnswlib headers (MIT)
+mechanism/               test and statistics scripts
+results/                 raw run outputs (summary.txt, cmd.txt, logs)
+scripts/                 reproduction shell scripts
+```
+
+## Build
+
+```
+g++ -O3 -march=native -std=c++17 -I cpp/third_party \
+    cpp/lease_certified.cpp -o lease_certified -pthread
+```
+
+The kernel uses AVX-512 for the exact scan; `-march=native` on a non-AVX-512 host
+builds the scalar fallback.
+
+## Data
+
+The 1M SIFT base is not bundled (512 MB). Download the ann-benchmarks file
+`sift-128-euclidean.hdf5`, or use any `1,000,000 x 128` float32 base with the same
+row order; `BASE` below points to it.
+
+Bundled inputs:
+
+- `results/ab_stream_official10k_20261109/queries10k_real.f32`
+  (10,000 x 128 float32, md5 `2b294e6cdaafcaf9a1e6dd35ba43fb31`)
+- `cpp/acl/erbac200k/roles.bin` (100 roles, 200k documents, md5
+  `dbcf99d67fff42f9caf26d58994c5b21`)
+- `cpp/acl/erbac200k/qroles_10000.bin` (one role per query, md5
+  `de4038ffd576df0f1f9687e3edd72469`)
+- `results/ab_stream_official10k_20261109/changes100.txt` (100 changes, md5
+  `7bd83ae974948840fa834285a099f4a4`)
+
+## Run the official 10k table
+
+```
+BASE=/path/to/sift1m/base.f32 scripts/reproduce_official10k.sh
+```
+
+The script runs the lease on the post-change snapshot and writes to
+`results/official10k_repro/`. The archived rows are in
+`results/ab_stream_official10k_20261109/` (lease, ACORN ef=32/256, Curator
+se=800/1600/2400/3200; `cmd.txt` records the exact environment).
+
+## Baselines
+
+`cpp/acorn_acl.cpp` and `cpp/curator_acl.cpp` are the drivers used for the
+baseline rows. They require the ACORN and Curator (v2) libraries, which are not
+bundled. The archived `cmd.txt` files give the arguments.
+
+## Tests
+
+```
+python3 mechanism/script_regression.py --bin ./lease_certified
+python3 mechanism/e0_contract_tests.py
+python3 mechanism/e0_certified_tests.py
+```
+
+The regression script generates its own random data and runs the independent
+oracle; it expects `--bin` and a writable temporary directory.
+
+## Results
+
+`results/` is organized by experiment; `MANIFEST.md` maps each paper table to
+the directory and gives the measured ratios. Absolute latencies are per-host;
+compare ratios, not absolute milliseconds, across the three hosts.
+
+## Hosts
+
+Three AVX-512 machines were used: Xeon Platinum 8352V, Ryzen 9 9950X, and Xeon
+Gold 6330. Host names are normalized in `cmd.txt` and manifests to
+`xeon-host`, `ryzen-host`, and `gold-host`.
+
+## License
+
+MIT for the code in this repository; `cpp/third_party/hnswlib` retains its MIT
+license.

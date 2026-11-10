@@ -1,0 +1,6 @@
+CHANGES_IN: applied 100 changes from stream_real2.txt
+[phase] train start n=200000
+[phase] train done 46.2714s
+[phase] add done 1.76606s
+[phase] grants done 0.387759s
+p50=6.48709 p95=7.60175 recall=0.99978 rss_mb=679 build_s=48.4262

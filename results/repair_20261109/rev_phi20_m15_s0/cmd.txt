@@ -1,0 +1,2 @@
+AGGR=0 BURST=0 n=1000000 dim=128 nq=200 k=10 K=10 changes=10000 threads=4 seed=0 mfac=15
+wrote results/repair_20261109/rev_phi20_m15_s0/summary.txt

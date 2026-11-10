@@ -1,0 +1,41 @@
+{
+ "acorn_ef32": {
+  "median_diff_ms": -0.05331899999999998,
+  "ci95": [
+   -0.05423199999999999,
+   -0.052334500000000006
+  ],
+  "frac_lease_faster": 0.8945,
+  "wilcoxon_p": 0.0,
+  "lease_p50": 0.2699275,
+  "base_p50": 0.3244205,
+  "frac_lease_slower": 0.1055,
+  "n_queries": 10000
+ },
+ "acorn_ef256": {
+  "median_diff_ms": -1.462313,
+  "ci95": [
+   -1.465154575,
+   -1.4597599500000003
+  ],
+  "frac_lease_faster": 0.9989,
+  "wilcoxon_p": 0.0,
+  "lease_p50": 0.2699275,
+  "base_p50": 1.74122,
+  "frac_lease_slower": 0.0011,
+  "n_queries": 10000
+ },
+ "curator_se800": {
+  "median_diff_ms": -0.669891,
+  "ci95": [
+   -0.673177,
+   -0.6673153000000001
+  ],
+  "frac_lease_faster": 0.9941,
+  "wilcoxon_p": 0.0,
+  "lease_p50": 0.2699275,
+  "base_p50": 0.9427745000000001,
+  "frac_lease_slower": 0.0059,
+  "n_queries": 10000
+ }
+}

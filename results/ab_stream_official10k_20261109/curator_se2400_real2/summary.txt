@@ -1,0 +1,1 @@
+curator n=200000 d=128 nq=10000 k=10 nlist=64 nprobe=32 p50=4.15791 p95=4.95144 recall=0.999 rss_mb=679 build_s=48.7899

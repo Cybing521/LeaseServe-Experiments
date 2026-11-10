@@ -1,0 +1,7 @@
+mode=arms_compare n=1000000 dim=128 nq=200 k=10 K=10 changes=1000 threads=4
+exact reads=1450 p50=0.82961 p95=0.917896 p99=0.935699 leaks=0 missing=0 auth=0 returned=14500 fallbacks=0
+static reads=1450 p50=0.092925 p95=0.109846 p99=0.118863 leaks=0 missing=0 auth=0 returned=14500 fallbacks=0
+unversioned reads=1450 p50=0.09596 p95=0.112361 p99=0.120096 leaks=0 missing=0 auth=0 returned=14500 fallbacks=0
+lease reads=1450 p50=0.041348 p95=0.054392 p99=0.060414 leaks=0 missing=0 auth=0 returned=14500 fallbacks=0
+pin_no_delta reads=1449 p50=0.490722 p95=0.783262 p99=0.8033 leaks=0 missing=0 auth=0 returned=14500 fallbacks=1442
+cov_no_delta reads=1449 p50=0.034424 p95=0.045656 p99=0.051306 leaks=0 missing=0 auth=0 returned=14500 fallbacks=0

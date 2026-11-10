@@ -1,0 +1,2 @@
+CERT=0 DROP_GRANT=5
+experiments/cpp/lease_certified_wt data/sift1m/base.f32 data/sift1m/queries_10k.f32 acl/erbac100_1m/roles.bin acl/erbac100_1m/qroles_head10.bin 1000000 128 200 10 10 60 4 0 results/e0_certified_1m_wt/nocert_hole 15

@@ -1,0 +1,1 @@
+mode=delta_mvcc n=1000000 dim=128 nq=500 k=10 K=10 mfac=15 delta_cap=4096 changes=200 threads=4 writers=4 build_s=40.0968 qps_static=20345.2 qps_inc=20348.6 static_p50=0.187811 static_p95=0.249666 static_p99=0.349493 incr_p50=0.188262 incr_p95=0.232285 incr_p99=0.27815 static_leaks=0 inc_leaks=0 straddled=0 retries=0 fallbacks=0 returned=3450 pin_violations=0 inc_missing=7

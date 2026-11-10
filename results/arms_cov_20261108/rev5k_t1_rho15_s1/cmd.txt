@@ -1,0 +1,2 @@
+AGGR=0 BURST=0 n=1000000 dim=128 nq=200 k=10 K=10 changes=5000 threads=1 seed=1 mfac=15
+wrote results/arms_cov_20261108/rev5k_t1_rho15_s1/summary.txt
