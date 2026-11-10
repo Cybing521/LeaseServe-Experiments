@@ -174,7 +174,10 @@ int main(int argc, char** argv) {
         ++constructed;
         if (target_is_top1) ++top1_valid;
 
-        for (int arm = 0; arm < 4; ++arm) {
+        // Rotate the arm order by query: with a fixed order the first arm paid the
+        // cold cache and read 2-3x slower than arms doing strictly more work.
+        for (int slot = 0; slot < 4; ++slot) {
+            const int arm = (q + slot) % 4;
             const auto t = Clock::now();
             std::vector<int> got;
             bool fallback = false;

@@ -1,0 +1,2 @@
+./lc /root/work/icde/data/sift1m/base.f32 /root/work/icde/data/sift1m/queries_10k.f32 /root/work/icde/acl/erbac100_1m/roles.bin /root/work/icde/acl/erbac100_1m/qroles_all.bin 1000000 128 200 10 50 100 4 0 k50r1 15
+env CHANGE_US=500 DELTA_CAP=4096 MERGE_EVERY=0 DROP_GRANT=0 CERT=1 WRITERS=1 MMAX=5000 WARMUP=100 SELFCHECK=0
