@@ -1,5 +1,8 @@
 # LeaseServe Experiments
 
+The written supplement (20 pages) is at
+https://github.com/Cybing521/LeaseServe-Supplement
+
 Experiment code, ACL inputs, and raw results for coverage-certified vector-search
 leases (ICDE 2027 submission). This repository contains no manuscript source or
 paper text.
