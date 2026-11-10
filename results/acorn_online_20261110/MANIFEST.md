@@ -1,27 +1,24 @@
-# ACORN online (1 reader + 1 writer)
+# ACORN online (fixed driver: warmup-first barrier)
 
-Status: **complete for the single-reader baseline**; 4 concurrent readers do not scale in
-this build. The paper's ACORN rows remain matched-snapshot; this file measures the online
-1R+1W path only.
+Source: `acorn_online.cpp`, sha256 `bd1b967450a4adf90dd6a31ea276ba7ab33681da98ad82df468a76d68755da47`.
+Index: ACORN-gamma M=32, gamma=12, M_beta=32; 200k SIFT, ERBAC ACL.
 
-- ACORN-gamma: M=32, gamma=12, M_beta=32; ef=32/256; 200k SIFT, ERBAC ACL.
-- 1 reader + 1 writer, 50 ACL changes over ~0.75 s (`CHANGE_US=15000`), 10k queries.
-- Each read copies the role bitmap (200 KB), pins that snapshot, and searches the copy;
-  the copy is outside the timed search, as the offline driver builds its filter outside timing.
-- No index rebuild: an ACL change flips one bitmap bit.
+Order: build -> untimed warmup over all 10k queries -> barrier releases 1 reader and 1 writer
+together. Writer applies 50 changes; each update interval and read interval is recorded.
 
-| run | p50 | p95 | p99 | leaks | updates |
+| run | p50 | p95 | p99 | overlap | leaks |
 |---|---:|---:|---:|---:|---:|
-| Xeon ef32 s0 | 0.347 | 0.452 | 0.726 | 0 | 50 |
-| Xeon ef32 s1 | 0.334 | 0.414 | 0.566 | 0 | 50 |
-| Xeon ef32 s2 | 0.343 | 0.429 | 0.553 | 0 | 50 |
-| Xeon ef32 offline | 0.360 | 0.427 | 0.479 | 0 | 0 |
-| Xeon ef256 online | 2.096 | 2.689 | 19.6 | 0 | 50 |
-| Xeon ef256 offline | 2.080 | 3.294 | 34.5 | 0 | 0 |
-| Ryzen ef32 online | 0.151 | 0.182 | 0.195 | 0 | 50 |
-| Ryzen ef32 offline | 0.144 | — | — | 0 | 0 |
-| Xeon ef32 4R static | 0.921 | 2.440 | 82.7 | 0 | 0 |
+| Ryzen ef32 s0 | 0.155 | 0.187 | 0.201 | 49/50 | 0 |
+| Ryzen ef32 s1 | 0.148 | 0.178 | 0.191 | 50/50 | 0 |
+| Ryzen ef32 s2 | 0.149 | 0.181 | 0.194 | 50/50 | 0 |
+| Ryzen ef32 truth run | 0.168 | 0.203 | 0.217 | 48/50 | 0 |
+| Ryzen ef256 | 0.866 | 0.996 | 1.05 | 28/50 | 0 |
+| Xeon ef32 fixed s0/s1 | 0.644/0.491 | 1.142/1.097 | 66.3/58.9 | 50/50 each | 0 |
+| Xeon static (load) | 0.636 | 1.176 | 45.8 | — | 0 |
 
-Offline numbers are the same-session ACORN driver; the paper's table uses an earlier run
-(0.308/0.364). The 4R static row shows the 82 ms tail is present without a writer, so the
-online baseline is single-reader. Driver: `acorn_online.cpp`.
+Truth run: missing 21/500, recall 0.958, leaked 0. Offline Ryzen 0.144 (ef32), 0.874 (ef256).
+Xeon fixed run has 50/50 overlap but p50 0.49--0.64 under shared-host load 24--29; not used for
+latency. Old pre-fix runs in this directory are historical only.
+
+Lease reference at the same 30 ms cadence (Ryzen, 3 seeds): p50 0.133--0.134, p95 0.153,
+p99 0.160, missing 46/100k, leaks 0 (`online_lease_20261110/fixed30/`).

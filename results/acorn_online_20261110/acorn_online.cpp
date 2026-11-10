@@ -1,28 +1,14 @@
-// ACORN online (EXPERIMENTAL -- not used for any number in the paper).
+// ACORN online driver used in supplement §ACORN's online path.
 //
-// Status 2026-11-10 21:25: the driver builds and runs, but the end-to-end online
-// campaign did not finish: a writer-starvation deadlock was fixed with a priority
-// flag, a 200 KB per-read bitmap copy was removed, and a warmup pass was added; the
-// last stable measurements were single-reader (p50 1.47 ms at ef=32 with 12/250
-// missing, 5.65 ms at ef=256 with 1/250), matching the offline recall but 5x its
-// latency, and the 4-reader runs were still being reconciled when the host session
-// dropped. Treat every number this binary prints as unverified; the paper makes no
-// online ACORN claim.
+// Order: build index -> untimed warmup over all queries -> barrier releases
+// 1 reader + 1 writer together. The writer applies 50 changes at a fixed
+// cadence; each update interval and each read interval is recorded, so
+// overlap_reads / overlapping_updates in summary.txt report actual overlap.
+// TRUTH_SAMPLE=1 adds an online exact check against the *pinned* bitmap
+// (quality run only; it pollutes latency).
 //
-// ACORN online: one shared ACORN index, a writer that applies ACL changes while
-// four readers query. Each read pins the ACL version it observed, searches with
-// that snapshot as the predicate bitmap, and is scored against the same snapshot.
+// Source hash and run commands: experiments/results/acorn_online_20261110/MANIFEST.md
 //
-// Reports query p50/p95/p99, update throughput, leaks@pin, and the missing count
-// against an exact scan of the pinned visible set (sampled every `--truth-every`
-// reads to keep the run short).
-//
-// Build (static faiss from the ACORN fork):
-//   g++ -O3 -march=native -std=c++17 -I<acorn>/ -I<acorn>/build \
-//       acorn_online.cpp <acorn>/build/faiss/libfaiss.a -fopenmp -lblas -llapack -o acorn_online
-// Run:
-//   ./acorn_online base.f32 queries.f32 roles.bin qroles.bin n d nq k M gamma M_beta ef \
-//       changes threads seed outdir
 #include <faiss/IndexACORN.h>
 #include <faiss/impl/ACORN.h>
 
@@ -108,121 +94,151 @@ int main(int argc, char** argv) {
         for (int x : ids[rr]) lives[rr][x] = 1;
     std::vector<char>& live = lives[r];
 
-    std::atomic<uint64_t> version{0};
-    std::atomic<bool> done{false};
     std::atomic<long> updates{0};
     std::atomic<long> granted_total{0}, revoked_total{0};
-
-    // Readers hold the shared lock for the duration of a search and use the bitmap in
-    // place; the writer takes it exclusively between changes. Copying the bitmap per
-    // read cost 200 KB of memcpy and produced a bogus 100 ms p99.
+    std::atomic<long> leaked{0}, missing{0}, checked{0};
     std::shared_mutex acl_mu;
-    // Writer priority: continuous readers otherwise starve the exclusive lock and the
-    // change stream never finishes.
-    std::atomic<bool> writer_wants{false};
+    std::mutex tmu;
+    std::vector<std::pair<double,double>> upd_iv, read_iv;
+
     std::mt19937 wrng(seed);
     long added = 0;
-    int change_us = 500;
+    int change_us = 0;
     if (const char* e = std::getenv("CHANGE_US")) change_us = std::max(1, std::atoi(e));
-    std::thread writer([&] {
-        for (int c = 0; c < changes; ++c) {
-            int doc, grant;
-            writer_wants.store(true, std::memory_order_release);
-            std::this_thread::sleep_for(std::chrono::microseconds(50));
-            {
-                std::unique_lock<std::shared_mutex> lk(acl_mu);
-                writer_wants.store(false, std::memory_order_release);
-                const bool g = (wrng() % 2) == 0;
-                if (g) {
-                    doc = static_cast<int>(wrng() % (unsigned)n);
-                    grant = !live[doc] ? 1 : 0;
-                } else {
-                    if (members.empty()) { std::this_thread::sleep_for(std::chrono::microseconds(200)); continue; }
-                    const size_t idx = wrng() % members.size();
-                    doc = members[idx];
-                    grant = 0;
-                    if (live[doc]) { members[idx] = members.back(); members.pop_back(); }
-                }
-                if ((grant && !live[doc]) || (!grant && live[doc])) {
-                    live[doc] = grant ? 1 : 0;
-                    updates.fetch_add(1, std::memory_order_relaxed);
-                    if (grant) { added++; granted_total.fetch_add(1, std::memory_order_relaxed); }
-                    else revoked_total.fetch_add(1, std::memory_order_relaxed);
-                }
-                version.fetch_add(1, std::memory_order_release);
-            }
-            std::this_thread::sleep_for(std::chrono::microseconds(change_us));
-        }
-        done.store(true, std::memory_order_release);
-    });
 
-    std::vector<std::vector<double>> lat(threads);
-    std::atomic<long> leaked{0}, missing{0}, checked{0};
-    std::vector<float> dist(k);
-    std::vector<faiss::idx_t> lab(k);
+    std::vector<float> wdist(k);
+    std::vector<faiss::idx_t> wlab(k);
     std::vector<char> filt(n);
 
-    // Search is a single-query call; keep OpenMP from oversubscribing the four
-    // readers (build/train above still uses the full pool).
     omp_set_num_threads(1);
 
-    // Warmup: one untimed pass over every query so the readers do not pay page faults
-    // and cold graph levels. The offline driver does the same; without it the online
-    // row reads ~5x slower for reasons that have nothing to do with churn.
+    // Warmup FIRST: the timed readers and the writer start together afterwards.
+    auto tw0 = Clock::now();
     for (int q = 0; q < nq_eff; ++q) {
         std::shared_lock<std::shared_mutex> lk(acl_mu);
-        index.search(1, queries + (size_t)q * d, k, dist.data(), lab.data(),
+        index.search(1, queries + (size_t)q * d, k, wdist.data(), wlab.data(),
                      lives[qr[q]].data(), nullptr);
     }
+    const double warm_s = std::chrono::duration<double>(Clock::now() - tw0).count();
+    if (change_us <= 0 && changes > 0) {
+        // Spread the changes over roughly the timed reader window.
+        change_us = std::max(1000, (int)(warm_s * 1e6 / changes * 1.05));
+    }
 
-    const auto t_start = Clock::now();
+    std::atomic<int> ready{0};
+    std::atomic<bool> go{false};
+    Clock::time_point t_origin;
+
+    std::thread writer;
+    if (changes > 0) {
+        writer = std::thread([&] {
+            ready.fetch_add(1, std::memory_order_relaxed);
+            while (!go.load(std::memory_order_acquire)) std::this_thread::yield();
+            for (int c = 0; c < changes; ++c) {
+                auto u0 = Clock::now();
+                int doc = 0, grant = 0;
+                {
+                    std::unique_lock<std::shared_mutex> lk(acl_mu);
+                    const bool g = (wrng() % 2) == 0;
+                    if (g) {
+                        doc = static_cast<int>(wrng() % (unsigned)n);
+                        grant = !live[doc] ? 1 : 0;
+                    } else {
+                        if (members.empty()) { std::this_thread::sleep_for(std::chrono::microseconds(200)); continue; }
+                        const size_t idx = wrng() % members.size();
+                        doc = members[idx];
+                        grant = 0;
+                        if (live[doc]) { members[idx] = members.back(); members.pop_back(); }
+                    }
+                    if ((grant && !live[doc]) || (!grant && live[doc])) {
+                        live[doc] = grant ? 1 : 0;
+                        updates.fetch_add(1, std::memory_order_relaxed);
+                        if (grant) { added++; granted_total.fetch_add(1, std::memory_order_relaxed); }
+                        else revoked_total.fetch_add(1, std::memory_order_relaxed);
+                    }
+                }
+                auto u1 = Clock::now();
+                {
+                    std::lock_guard<std::mutex> g(tmu);
+                    upd_iv.emplace_back(std::chrono::duration<double>(u0 - t_origin).count(),
+                                       std::chrono::duration<double>(u1 - t_origin).count());
+                }
+                std::this_thread::sleep_for(std::chrono::microseconds(change_us));
+            }
+        });
+    }
+
+    std::vector<std::vector<double>> lat(threads);
     std::vector<std::thread> readers;
     for (int t = 0; t < threads; ++t) {
         readers.emplace_back([&, t] {
             std::vector<float> dist(k);
             std::vector<faiss::idx_t> lab(k);
             std::vector<char> hot(n);
+            std::vector<std::pair<double,double>> local;
+            local.reserve((size_t)nq_eff / threads + 1);
+            ready.fetch_add(1, std::memory_order_relaxed);
+            while (!go.load(std::memory_order_acquire)) std::this_thread::yield();
             for (int q = t; q < nq_eff; q += threads) {
-                    const float* qv = queries + (size_t)q * d;
-                    while (writer_wants.load(std::memory_order_acquire)) std::this_thread::yield();
-                    {
-                        std::shared_lock<std::shared_mutex> lk(acl_mu);
-                        std::memcpy(hot.data(), lives[qr[q]].data(), (size_t)n);
+                const float* qv = queries + (size_t)q * d;
+                {
+                    std::shared_lock<std::shared_mutex> lk(acl_mu);
+                    std::memcpy(hot.data(), lives[qr[q]].data(), (size_t)n);
+                }
+                auto t0 = Clock::now();
+                index.search(1, qv, k, dist.data(), lab.data(), hot.data(), nullptr);
+                auto t1 = Clock::now();
+                lat[t].push_back(std::chrono::duration<double, std::milli>(t1 - t0).count());
+                local.emplace_back(std::chrono::duration<double>(t0 - t_origin).count(),
+                                   std::chrono::duration<double>(t1 - t_origin).count());
+                for (int i = 0; i < k; ++i) {
+                    const int got = (int)lab[i];
+                    if (got < 0) continue;
+                    if (!hot[(size_t)got]) leaked.fetch_add(1, std::memory_order_relaxed);
+                }
+                // Independent online truth: sample the pinned bitmap, not a static ACL.
+                if (std::getenv("TRUTH_SAMPLE") && q % 200 == 0) {
+                    std::vector<int> vis;
+                    vis.reserve(ids[qr[q]].size());
+                    for (int x = 0; x < n; ++x) if (hot[(size_t)x]) vis.push_back(x);
+                    std::vector<std::pair<float,int>> all;
+                    all.reserve(vis.size());
+                    for (int doc : vis) {
+                        float s = 0; const float* dv = base + (size_t)doc * d;
+                        for (int j = 0; j < d; ++j) { const float tt = qv[j] - dv[j]; s += tt * tt; }
+                        all.emplace_back(s, doc);
                     }
-                    auto t0 = Clock::now();
-                    index.search(1, qv, k, dist.data(), lab.data(), hot.data(), nullptr);
-                    auto t1 = Clock::now();
-                    lat[t].push_back(std::chrono::duration<double, std::milli>(t1 - t0).count());
-                    for (int i = 0; i < k; ++i) {
-                        const int got = (int)lab[i];
-                        if (got < 0) continue;
-                        if (!hot[(size_t)got]) leaked.fetch_add(1, std::memory_order_relaxed);
-                    }
-                    if (std::getenv("TRUTH_SAMPLE") && (q + t) % 8 == 0) {
-                        std::vector<int> vis;
-                        vis.reserve(members.size());
-                        for (int x = 0; x < n; ++x) if (hot[(size_t)x]) vis.push_back(x);
-                        std::vector<std::pair<float, int>> all;
-                        all.reserve(vis.size());
-                        for (int doc : vis) {
-                            float s = 0; const float* dv = base + (size_t)doc * d;
-                            for (int j = 0; j < d; ++j) { const float tt = qv[j] - dv[j]; s += tt * tt; }
-                            all.emplace_back(s, doc);
-                        }
-                        const size_t kk = std::min<size_t>((size_t)k, all.size());
-                        std::partial_sort(all.begin(), all.begin() + kk, all.end());
-                        std::unordered_set<int> gs;
-                        for (int i = 0; i < k; ++i) if (lab[i] >= 0) gs.insert((int)lab[i]);
-                        for (size_t i = 0; i < kk; ++i) if (!gs.count(all[i].second))
-                            missing.fetch_add(1, std::memory_order_relaxed);
-                        checked.fetch_add(kk, std::memory_order_relaxed);
-                    }
+                    const size_t kk = std::min<size_t>((size_t)k, all.size());
+                    std::partial_sort(all.begin(), all.begin() + kk, all.end());
+                    std::unordered_set<int> gs;
+                    for (int i = 0; i < k; ++i) if (lab[i] >= 0) gs.insert((int)lab[i]);
+                    for (size_t i = 0; i < kk; ++i) if (!gs.count(all[i].second))
+                        missing.fetch_add(1, std::memory_order_relaxed);
+                    checked.fetch_add(kk, std::memory_order_relaxed);
+                }
             }
+            std::lock_guard<std::mutex> g(tmu);
+            read_iv.insert(read_iv.end(), local.begin(), local.end());
         });
     }
+
+    while (ready.load(std::memory_order_acquire) < threads + (changes > 0 ? 1 : 0))
+        std::this_thread::yield();
+    t_origin = Clock::now();
+    go.store(true, std::memory_order_release);
     for (auto& th : readers) th.join();
     if (writer.joinable()) writer.join();
-    const double run_s = std::chrono::duration<double>(Clock::now() - t_start).count();
+    const double run_s = std::chrono::duration<double>(Clock::now() - t_origin).count();
+
+    long overlap_reads = 0, overlapping_updates = 0;
+    for (auto& r : read_iv) {
+        for (auto& u : upd_iv)
+            if (r.first <= u.second && u.first <= r.second) { overlap_reads++; break; }
+    }
+    for (auto& u : upd_iv) {
+        for (auto& r : read_iv)
+            if (u.first <= r.second && r.first <= u.second) { overlapping_updates++; break; }
+    }
 
     std::vector<double> all;
     for (auto& v : lat) all.insert(all.end(), v.begin(), v.end());
@@ -234,12 +250,13 @@ int main(int argc, char** argv) {
     sm << "acorn_online n=" << n << " d=" << d << " nq=" << nq_eff << " k=" << k
        << " M=" << M << " gamma=" << gamma << " M_beta=" << M_beta << " ef=" << ef
        << " changes=" << changes << " threads=" << threads << " reads=" << all.size()
-       << " run_s=" << run_s
+       << " run_s=" << run_s << " warm_s=" << warm_s << " change_us=" << change_us
        << " p50=" << p50 << " p95=" << p95 << " p99=" << p99
-       << " updates=" << upd << " updates_per_s=" << (run_s > 0 ? upd / run_s : 0)
-       << " granted=" << granted_total.load() << " revoked=" << revoked_total.load()
+       << " updates=" << upd << " granted=" << granted_total.load() << " revoked=" << revoked_total.load()
+       << " overlap_reads=" << overlap_reads << " overlapping_updates=" << overlapping_updates
        << " leaked=" << leaked.load()
-       << " missing=" << missing.load() << " truth_checked=" << checked.load() << "\n";
+       << " missing=" << missing.load() << " truth_checked=" << checked.load()
+       << " recall=" << (checked.load() ? 1.0 - (double)missing.load() / checked.load() : 0.0) << "\n";
     std::printf("%s", ("wrote " + outdir + "/summary.txt\n").c_str());
     return 0;
 }
