@@ -11,6 +11,7 @@ cpp/                     C++ kernel, baseline drivers, ACL inputs
   lease_certified.cpp    certified lease kernel (read path, writer, WAL, tests hooks)
   acorn_acl.cpp          ACORN driver used for the 10k table
   curator_acl.cpp        Curator driver used for the 10k table
+  curator_acl_precomputed.cpp  same, precomputed-truth protocol control
   gen_erbac_acl.py       ERBAC ACL generator
   acl/erbac200k/         roles.bin, qroles_10000.bin, qroles_all.bin
   third_party/hnswlib/   stock hnswlib headers (MIT)
