@@ -1,0 +1,10 @@
+tag=mat_zipf_K10_a100_s0 arm=D aggr=100 drop_every=0 merge_every=0 seed=0 n=1000000 dim=128 nq=2000 k=10 K=10 changes=2000 threads=4 mfac=15
+reads=6000 leased=2985 fallbacks=0 unpromoted=3015 fallback_rate=0.0000 leased_rate=0.4975
+p50=0.1519 p95=0.3180 p99=0.3257 mean=0.2080
+lease_p50=0.1174 lease_p95=0.1428 lease_mean=0.1157 lease_reads=2985
+exact_p50=0.3047 exact_p95=0.3215 exact_mean=0.2994 exact_reads=3015
+missing=0 auth=0 leaks=0 returned=60000
+applied=2000 update_total_ms=2.1487 update_p50_ms=0.0005 update_p95_ms=0.0010 merges=0 merge_total_ms=0.0000
+dist_comps=157965
+prof_search_ms=306.8633 prof_post_ms=17.6985
+rss_mb=696.5430 build_ms=1402.0129 matfac=0.0500 mat_docs=50000 ring_rows=2000 ever_docs=52000

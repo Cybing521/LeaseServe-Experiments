@@ -1,0 +1,10 @@
+tag=mat_head10_K100_a100_s0 arm=D aggr=100 drop_every=0 merge_every=0 seed=0 n=1000000 dim=128 nq=2000 k=10 K=100 changes=2000 threads=4 mfac=15
+reads=6000 leased=6000 fallbacks=0 unpromoted=0 fallback_rate=0.0000 leased_rate=1.0000
+p50=0.0989 p95=0.1127 p99=0.1191 mean=0.0985
+lease_p50=0.0989 lease_p95=0.1127 lease_mean=0.0985 lease_reads=6000
+exact_p50=0.0000 exact_p95=0.0000 exact_mean=0.0000 exact_reads=0
+missing=0 auth=0 leaks=0 returned=60000
+applied=2000 update_total_ms=1.5206 update_p50_ms=0.0007 update_p95_ms=0.0012 merges=0 merge_total_ms=0.0000
+dist_comps=319368
+prof_search_ms=557.9804 prof_post_ms=20.7477
+rss_mb=2295.7031 build_ms=14010.8321 matfac=0.5000 mat_docs=500000 ring_rows=2000 ever_docs=502000

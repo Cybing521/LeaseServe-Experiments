@@ -1,0 +1,246 @@
+--- experiments/cpp/source_snapshots/lease_certified_c5ef787.cpp	2026-11-10 01:08:17
++++ experiments/cpp/lease_certified.cpp	2026-11-10 18:16:03
+@@ -5,9 +5,12 @@
+ // certified by an interval [a, omega] instead of version equality:
+ //
+ //   * a read loads the lease, registers a ref, re-checks the pointer, pins the
+-//     published epoch, and uses the lease only if a <= pin <= omega.  If the
+-//     interval does not hold it scans V(r,pin) exactly -- that is the *only*
+-//     fallback (plus an 8-way lease-swap retry, which is counted with it).
++//     published epoch, and uses the lease only if a <= pin <= omega.  It scans
++//     V(r,pin) exactly in four cases: (i) the role has no lease (K < #roles),
++//     (ii) the interval does not hold, (iii) the budget guard fires (see below),
++//     and (iv) eight lease-swap retries were exhausted.  Cases (i)-(iii) each
++//     add one to cert_fallbacks; the budget guard also adds to budget_fallbacks;
++//     per-attempt swaps add to lease_retries.
+ //   * grant/revoke publication is data -> omega -> version.  A grant is appended
+ //     to the per-lease ring (entry first, ring_n release), a revoke only flips the
+ //     byte.  DROP_GRANT=k loses every k-th grant from the ring and freezes omega
+@@ -28,17 +31,27 @@
+ //   3. historical state is reconstructed as "last transition <= min_live_a"
+ //      baseline + transitions above it (a strict prefix drop loses the state at
+ //      the lower bound for old pins).
+-//   4. |W| for the dead-fraction phi is the materialized set size
+-//      |V(r,a)| + |ring| (graph element count + ring_n), per docs/172.
++//   4. |W| for the dead-fraction phi is the materialized set size: every node
++//      ever added to the graph (cur_element_count, which keeps dead nodes) plus
++//      the ring (ring_n).  It is NOT |V(r,a)|, the visible set, which shrinks as
++//      revokes land.
+ //   5. recovery replays the log, rebuilds the lease over the replayed set at the
+ //      last durable epoch, and only then serves; a post-recovery change therefore
+ //      never advances omega over grants that are in neither graph nor ring.
+ //
+ // Run:
+ //   lease_certified base queries roles qroles n dim nq k K changes threads seed outdir [mfac]
+-// Env: CHANGE_US=500 DELTA_CAP=4096 MERGE_EVERY=0 DROP_GRANT=0 CERT=1 WRITERS=1 MMAX=5000
+-// Build:
+-// Build: g++ -O3 -march=native -std=c++17 -I/tmp/hnswlib experiments/cpp/lease_certified.cpp -o experiments/cpp/lease_certified -pthread
++// Env (see the getenv() calls for the full set):
++//   CHANGE_US=500  DELTA_CAP=4096  MERGE_EVERY=0  DROP_GRANT=0  CERT=1
++//   WRITERS=1      MMAX=5000       WARMUP=half the stream, >=100
++//   SKIP_VERIFY=1  (skips the exact oracle; missing/auth/leaks are then NOT
++//                  measured and print 0 -- read verified=0 in the summary)
++//   DUMP_LAT=<path>  (writes per-query latencies; default <outdir>/lat.txt)
++//   PRED=1 (version equality arm)   NOLOG=1 (omega := a)   ANY_ROLE=1
++//   PROMOTE_ON_WRITE=1  PROMOTE_DRY=1  PROMOTE_LOG=<path>  SELFCHECK=1
++//   REGRANT_CHECK=1  SCRIPT=<path>  WAL=<path>  WAL_TIMEOUT_MS  REPLAY=1
++//   CHANGES_OUT / MERGES_OUT / QUERIES_OUT  MEM_BALLAST_MB  READ_DELAY_MS
++// Build: g++ -O3 -march=native -std=c++17 -I experiments/cpp/third_party experiments/cpp/lease_certified.cpp -o experiments/cpp/lease_certified -pthread
+ 
+ #include <algorithm>
+ #include <array>
+@@ -171,7 +184,7 @@
+ 
+     std::mutex exact_mu;                           // cur / ever copy for snapshots
+     std::unordered_set<int> cur;                   // writer-only under exact_mu
+-    std::unordered_set<int> ever;                  // writer-only under exact_mu
++    std::unordered_set<int> ever;                  // writer-only; readers copy it under ever_mu
+ 
+     mutable std::shared_mutex ever_mu;             // guards ever for the fallback snapshot
+     mutable std::shared_mutex hist_mu;             // guards hist, base, multi updates
+@@ -184,7 +197,8 @@
+     int changes_since_merge = 0;
+     bool hole = false;                             // DROP_GRANT fired: omega frozen
+ 
+-    // Caller holds hist_mu (shared or unique) when multi[d] can be set.
++    // multi[d] is set by the writer under exact_mu (publish_grant), before
++    // hist_mu is taken for the history append.
+     bool visible_locked(int d, uint64_t pin) const {
+         if (multi[d].load(std::memory_order_relaxed)) {
+             auto it = hist.find(d);
+@@ -340,13 +354,13 @@
+     }
+ };
+ 
+-static std::atomic<long> g_cert_fallbacks{0}, g_merges{0}, g_retries{0}, g_straddled{0};
++static std::atomic<long> g_cert_fallbacks{0}, g_budget_fallbacks{0}, g_merges{0}, g_retries{0}, g_straddled{0};
+ static std::atomic<long> g_wal_refused{0};
+ static std::atomic<long> g_regrant_violations{0};   // REGRANT_CHECK=1
+ static std::atomic<long> g_promotions{0};           // cold-role promotions
+ static std::atomic<long> g_promote_us{0};           // total time spent building promoted roles
+-static std::atomic<long> g_exact_reads{0};
+-static std::atomic<long> g_unpromoted_change{0};  // refused: change to a role without a state   // reads served by an exact scan (unpromoted or uncertified)
++static std::atomic<long> g_exact_reads{0};         // reads served by an exact scan (no lease, uncertified, budget guard, or exhausted retries)
++static std::atomic<long> g_unpromoted_change{0};   // refused: change to a role without a state
+ static std::atomic<long> g_leaks{0}, g_missing{0}, g_auth{0};
+ 
+ int main(int argc, char** argv) {
+@@ -379,7 +393,10 @@
+     if (const char* e = std::getenv("CERT")) cert_on = (std::atoi(e) != 0);
+     int pred_eq = 0;      // PRED=1: version equality instead of the covering interval
+     if (const char* e = std::getenv("PRED")) pred_eq = (std::atoi(e) != 0);
+-    int nolog = 0;        // NOLOG=1: certificate over the graph only (no grant log)
++    int nolog = 0;        // NOLOG=1: omega := a, so only pin == a is covered.  The ring is
++                          // still appended, still supplies candidates, and still counts in W;
++                          // this arm measures a graph-plus-ring read without a watermark,
++                          // which falls back once any change lands after the build.
+     if (const char* e = std::getenv("NOLOG")) nolog = (std::atoi(e) != 0);
+     int writers = 1;
+     if (const char* e = std::getenv("WRITERS")) writers = std::max(1, std::atoi(e));
+@@ -853,6 +870,10 @@
+     };
+ 
+     // ---- read path ---------------------------------------------------------
++    const bool skip_verify = []() {
++        const char* e = std::getenv("SKIP_VERIFY");
++        return e && std::atoi(e) != 0;
++    }();
+     auto query_one = [&](int q, std::vector<int>& got, uint64_t& pin_out,
+                          double& lat_ms, int& role_out) -> bool {
+         role_out = qroles[q];
+@@ -887,21 +908,29 @@
+                                          : L->omega.load(std::memory_order_acquire);
+             const bool covered = cert_on && (pred_eq ? (pin == L->a)
+                                                      : (pin >= L->a && pin <= omega));
++            // Budget guard: a capped graph search would silently trade ann for
++            // latency.  The lease is used only while phi <= 1 - 1/mfac (the
++            // Proposition dead-node bound) and k*mfac <= mmax; otherwise the
++            // read answers exactly.  m itself is a fixed k*mfac, not scaled by
++            // phi -- the phi test is the boolean gate.
++            const long W = static_cast<long>(L->g->cur_element_count.load()) +
++                           L->ring_n.load(std::memory_order_acquire);
++            const int live = std::max(1, st->live.load(std::memory_order_relaxed));
++            double phi = 1.0 - static_cast<double>(live) / std::max<long>(1, W);
++            if (phi < 0.0) phi = 0.0;
++            if (phi > 0.99) phi = 0.99;
++            const bool budget_ok =
++                phi <= 1.0 - 1.0 / static_cast<double>(mfac) &&
++                static_cast<double>(k) * mfac <= static_cast<double>(mmax);
+ 
+-            if (cert_on && !covered) {
++            if (cert_on && (!covered || !budget_ok)) {
+                 exact_visible(st, pin, qv, got);
+                 g_cert_fallbacks.fetch_add(1, std::memory_order_relaxed);
++                if (covered) g_budget_fallbacks.fetch_add(1, std::memory_order_relaxed);
+                 g_exact_reads.fetch_add(1, std::memory_order_relaxed);
+                 exact_read = true;
+                 done = true;
+             } else {
+-                // m = min(m_max, ceil(rho*k/(1-phi))), phi = dead fraction of W.
+-                const long W = static_cast<long>(L->g->cur_element_count.load()) +
+-                               L->ring_n.load(std::memory_order_acquire);
+-                const int live = std::max(1, st->live.load(std::memory_order_relaxed));
+-                double phi = 1.0 - static_cast<double>(live) / std::max<long>(1, W);
+-                if (phi < 0.0) phi = 0.0;
+-                if (phi > 0.99) phi = 0.99;
+                 long m = static_cast<long>(std::ceil(static_cast<double>(k) * mfac));
+                 m = std::min<long>(m, mmax);
+                 m = std::max<long>(m, k);
+@@ -944,7 +973,7 @@
+             lat_ms = std::chrono::duration<double, std::milli>(t_end - t_start).count();
+             pin_out = pin;
+ 
+-            if (!exact_read) {
++            if (!exact_read && !skip_verify) {
+                 // Same accounting as the old driver: compare with exact V(r,pin).
+                 std::vector<int> truth;
+                 exact_visible(st, pin, qv, truth);
+@@ -1133,7 +1162,11 @@
+         // CHANGES_OUT replays this exact stream into the baseline drivers, so a
+         // comparison can be run on one post-change snapshot (review W3).
+         if (const char* co = std::getenv("CHANGES_OUT")) {
+-            if (FILE* cf = std::fopen(co, "a")) {
++            // Truncate on the first write of a run: opening "a" made a second run
++            // append a duplicate stream that the baselines then replayed twice.
++            static bool changes_opened = false;
++            if (FILE* cf = std::fopen(co, changes_opened ? "a" : "w")) {
++                changes_opened = true;
+                 std::fprintf(cf, "%llu %s %d %d\n",
+                              static_cast<unsigned long long>(epoch),
+                              grant ? "grant" : "revoke", r, changed_doc);
+@@ -1439,12 +1472,14 @@
+     std::vector<std::vector<int>> gots(nq);
+     std::vector<double> lat(nq, 0.0);
+     std::vector<std::vector<double>> lat_exact_all(threads), lat_lease_all(threads);
++    std::vector<Clock::time_point> t_start(threads), t_end(threads);
+     std::vector<std::thread> readers;
+     for (int t = 0; t < threads; ++t) {
+         readers.emplace_back([&, t]() {
+             while (!readers_go.load(std::memory_order_acquire)) {}
+             if (read_delay_ms)
+                 std::this_thread::sleep_for(std::chrono::milliseconds(read_delay_ms));
++            t_start[t] = Clock::now();
+             const int lo = t * nq / threads;
+             const int hi = (t + 1) * nq / threads;
+             for (int q = lo; q < hi; ++q) {
+@@ -1455,9 +1490,24 @@
+                 else
+                     lat_exact_all[t].push_back(lat[q]);
+             }
++            t_end[t] = Clock::now();
+         });
+     }
+     for (auto& th : readers) th.join();
++    double read_s = 0.0, qps = 0.0;
++    {
++        Clock::time_point lo = t_start[0], hi = t_end[0];
++        for (int i = 1; i < threads; ++i) {
++            if (t_start[i] < lo) lo = t_start[i];
++            if (t_end[i] > hi) hi = t_end[i];
++        }
++        read_s = std::chrono::duration<double>(hi - lo).count();
++        // QPS from the per-query timings: read_s also covers the offline exact
++        // verification used for missing/leak accounting, which is not query work.
++        double lat_sum = 0.0;
++        for (int q = 0; q < nq; ++q) lat_sum += lat[q];
++        qps = lat_sum > 0 ? (static_cast<double>(nq) * threads * 1000.0) / lat_sum : 0.0;
++    }
+     for (auto& w : writer_threads) w.join();
+     sampler_done.store(true, std::memory_order_relaxed);
+     if (sampler.joinable()) sampler.join();
+@@ -1528,15 +1578,27 @@
+         }
+     }
+     std::filesystem::create_directories(outdir);
++    if (const char* dl = std::getenv("DUMP_LAT")) {
++        // DUMP_LAT=1 (or empty) keeps the historical <outdir>/lat.txt; any other
++        // value is used verbatim as the output path.
++        const std::string lpath = (dl[0] == '\0' || std::strcmp(dl, "1") == 0)
++                                      ? outdir + "/lat.txt" : std::string(dl);
++        std::ofstream lf(lpath);
++        for (int q = 0; q < nq; ++q) lf << q << " " << lat[q] << "\n";
++    }
+     {
+         std::ofstream sm(outdir + "/summary.txt");
+         sm << "certified reads=" << reads
++           << " certified_reads=" << static_cast<long>(lat_l.size())
++           << " verified=" << (skip_verify ? 0 : 1)
++           << " read_s=" << read_s << " qps=" << qps
+            << " p50=" << pctl(lat, 0.50)
+            << " p95=" << pctl(lat, 0.95)
+            << " p99=" << pctl(lat, 0.99)
+            << " leaks=" << leaks
+            << " missing=" << missing
+            << " auth=" << auth
++           << " budget_fallbacks=" << g_budget_fallbacks.load()
+            << " cert_fallbacks=" << cert_fb << " wal_refused=" << g_wal_refused.load() << " unpromoted_refused=" << g_unpromoted_change.load()
+            << " merges=" << merges
+            << " hist_rows=" << hist_rows << " log_len=" << log_total
+@@ -1562,6 +1624,7 @@
+               << " leaks=" << leaks
+               << " missing=" << missing
+               << " auth=" << auth
++              << " budget_fallbacks=" << g_budget_fallbacks.load()
+               << " cert_fallbacks=" << cert_fb << " wal_refused=" << g_wal_refused.load() << " unpromoted_refused=" << g_unpromoted_change.load()
+               << " merges=" << merges
+               << " hist_rows=" << hist_rows

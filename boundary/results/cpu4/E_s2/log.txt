@@ -1,0 +1,10 @@
+tag=cpu4_E_s2 arm=E aggr=50 drop_every=0 merge_every=200 seed=2 n=1000000 dim=128 nq=2000 k=10 K=10 changes=10000 threads=4 mfac=15
+reads=142500 leased=142500 fallbacks=0 unpromoted=0 fallback_rate=0.0000 leased_rate=1.0000
+p50=0.1027 p95=0.1190 p99=0.1272 mean=0.1141
+lease_p50=0.1027 lease_p95=0.1190 lease_mean=0.1141 lease_reads=142500
+exact_p50=0.0000 exact_p95=0.0000 exact_mean=0.0000 exact_reads=0
+missing=0 auth=0 leaks=0 returned=1425000
+applied=10000 update_total_ms=13902.8386 update_p50_ms=0.0004 update_p95_ms=0.0011 merges=47 merge_total_ms=13896.7641
+dist_comps=651489
+prof_search_ms=14882.4628 prof_post_ms=729.2097
+rss_mb=992.2656 build_ms=1402.8566 matfac=0.0500 mat_docs=50000 ring_rows=5024 ever_docs=55024

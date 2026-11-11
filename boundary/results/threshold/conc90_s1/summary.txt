@@ -1,0 +1,10 @@
+tag=thr_conc90_s1 arm=D aggr=50 drop_every=0 merge_every=0 seed=1 n=1000000 dim=128 nq=2000 k=10 K=100 changes=2000 threads=4 mfac=15
+reads=6000 leased=5397 fallbacks=0 unpromoted=603 fallback_rate=0.0000 leased_rate=0.8995
+p50=0.1198 p95=0.3039 p99=0.3149 mean=0.1357
+lease_p50=0.1185 lease_p95=0.1324 lease_mean=0.1169 lease_reads=5397
+exact_p50=0.3038 exact_p95=0.3178 exact_mean=0.3038 exact_reads=603
+missing=6 auth=0 leaks=0 returned=60000
+applied=2000 update_total_ms=1.3466 update_p50_ms=0.0006 update_p95_ms=0.0012 merges=0 merge_total_ms=0.0000
+dist_comps=281640
+prof_search_ms=599.3196 prof_post_ms=19.9087
+rss_mb=2295.8516 build_ms=13963.6861 matfac=0.5000 mat_docs=500000 ring_rows=982 ever_docs=500982

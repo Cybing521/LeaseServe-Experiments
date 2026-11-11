@@ -1,0 +1,2 @@
+./lease_cur /root/autodl-tmp/icde_cm/base.f32 /root/work/icde/results/ab_stream_rerun_20261109/queries10k_real.f32 roles20k.bin qroles20k.bin 200000 128 50 1000 1 1 4 0 k1000_r20k_m5000 15
+env CHANGE_US=500 DELTA_CAP=4096 MERGE_EVERY=0 DROP_GRANT=0 CERT=1 WRITERS=1 MMAX=5000 WARMUP=1 SELFCHECK=0

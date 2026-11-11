@@ -1162,7 +1162,11 @@ int main(int argc, char** argv) {
         // CHANGES_OUT replays this exact stream into the baseline drivers, so a
         // comparison can be run on one post-change snapshot (review W3).
         if (const char* co = std::getenv("CHANGES_OUT")) {
-            if (FILE* cf = std::fopen(co, "a")) {
+            // Truncate on the first write of a run: opening "a" made a second run
+            // append a duplicate stream that the baselines then replayed twice.
+            static bool changes_opened = false;
+            if (FILE* cf = std::fopen(co, changes_opened ? "a" : "w")) {
+                changes_opened = true;
                 std::fprintf(cf, "%llu %s %d %d\n",
                              static_cast<unsigned long long>(epoch),
                              grant ? "grant" : "revoke", r, changed_doc);

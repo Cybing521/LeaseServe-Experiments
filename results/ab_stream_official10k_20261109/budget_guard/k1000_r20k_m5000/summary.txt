@@ -1,0 +1,1 @@
+certified reads=50 read_s=0.0813953 qps=868.606 p50=3.54418 p95=10.6802 p99=10.8082 leaks=0 missing=3 auth=0 read_s=0.0813953 qps=868.606 cert_fallbacks=0 wal_refused=0 unpromoted_refused=0 merges=0 hist_rows=1 log_len=0 cur_total=19999 replay_s=0 state_mismatch=-1 visible_total=-1 straddled=0

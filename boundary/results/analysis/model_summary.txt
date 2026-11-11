@@ -1,0 +1,1 @@
+cells=30 in-run_MAPE=0.14% in-run_max=0.34% heldout_MAPE=6.81% heldout_max=13.82% TL_global=0.1090

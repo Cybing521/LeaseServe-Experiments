@@ -224,11 +224,11 @@ int main(int argc, char** argv) {
            << " M=" << M << " gamma=" << gamma << " M_beta=" << M_beta
            << " ef=" << ef << " build_s=" << build_s
            << " p50=" << pctl(ms, 50) << " p95=" << pctl(ms, 95)
-           << " recall=" << recall << " leak=" << leaked
+           << " p99=" << pctl(ms, 99) << " recall=" << recall << " leak=" << leaked
            << " rss_mb=" << vm << " roles=" << n_roles << "\n";
         sm.flush();
         std::cout << "ef=" << ef << " p50=" << pctl(ms, 50)
-                  << " p95=" << pctl(ms, 95) << " recall=" << recall
+                  << " p95=" << pctl(ms, 95) << " p99=" << pctl(ms, 99) << " recall=" << recall
                   << " leak=" << leaked << " rss_mb=" << vm
                   << " build_s=" << build_s << "\n";
     }

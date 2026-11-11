@@ -1,0 +1,2 @@
+./lease_snap /root/autodl-tmp/icde_cm/base.f32 /root/work/icde/results/ab_stream_rerun_20261109/queries10k_real.f32 /root/autodl-tmp/icde_cm/acl/erbac100/roles.bin /root/autodl-tmp/icde_cm/acl/erbac100/qroles_head10.bin 1000000 128 200 10 10 200 4 2 cert3/full_drop0_s2 15
+env CHANGE_US=500 DELTA_CAP=4096 MERGE_EVERY=0 DROP_GRANT=0 CERT=1 WRITERS=1 MMAX=5000 WARMUP=100 SELFCHECK=0

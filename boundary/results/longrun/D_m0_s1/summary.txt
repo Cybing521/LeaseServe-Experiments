@@ -1,0 +1,10 @@
+tag=long_D_m0_s1 arm=D aggr=50 drop_every=0 merge_every=0 seed=1 n=1000000 dim=128 nq=2000 k=10 K=10 changes=10000 threads=4 mfac=15
+reads=24000 leased=24000 fallbacks=0 unpromoted=0 fallback_rate=0.0000 leased_rate=1.0000
+p50=0.1141 p95=0.1373 p99=0.1455 mean=0.1145
+lease_p50=0.1141 lease_p95=0.1373 lease_mean=0.1145 lease_reads=24000
+exact_p50=0.0000 exact_p95=0.0000 exact_mean=0.0000 exact_reads=0
+missing=0 auth=0 leaks=0 returned=240000
+applied=10000 update_total_ms=5.0367 update_p50_ms=0.0004 update_p95_ms=0.0007 merges=0 merge_total_ms=0.0000
+dist_comps=1277472
+prof_search_ms=2239.1978 prof_post_ms=220.6811
+rss_mb=698.4531 build_ms=1404.7554 matfac=0.0500 mat_docs=50000 ring_rows=4975 ever_docs=54975

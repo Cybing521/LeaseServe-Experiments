@@ -1,0 +1,10 @@
+tag=exact_uniform_s0 arm=X aggr=50 drop_every=0 merge_every=0 seed=0 n=1000000 dim=128 nq=2000 k=10 K=0 changes=0 threads=4 mfac=15
+reads=2000 leased=0 fallbacks=2000 unpromoted=0 fallback_rate=1.0000 leased_rate=0.0000
+p50=0.3068 p95=0.3220 p99=0.3495 mean=0.3059
+lease_p50=0.0000 lease_p95=0.0000 lease_mean=0.0000 lease_reads=0
+exact_p50=0.3068 exact_p95=0.3220 exact_mean=0.3059 exact_reads=2000
+missing=0 auth=0 leaks=0 returned=20000
+applied=0 update_total_ms=0.0000 update_p50_ms=0.0000 update_p95_ms=0.0000 merges=0 merge_total_ms=0.0000
+dist_comps=0
+prof_search_ms=0.0000 prof_post_ms=0.0000
+rss_mb=534.5938 build_ms=0.0001 matfac=0.0000 mat_docs=0 ring_rows=0 ever_docs=0

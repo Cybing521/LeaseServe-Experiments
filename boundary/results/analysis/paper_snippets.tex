@@ -1,0 +1,58 @@
+% A-E ablation. 1M SIFT, Uniform 1k roles, head-10, K=10, 2000 changes, 4R+1W, 3 seeds.
+\begin{table*}[t]\centering\footnotesize
+\caption{One controlled kernel, five mechanisms. Only the validity rule changes; graph, queries, stream and scoring are shared. \emph{stream}: revoke-only, 50/50, grant-only; \emph{hole}: one grant per five changes is dropped from the log and the watermark freezes. \emph{auth} counts missing top-10 results whose document had no candidate path; leaks are zero in every cell. Update is the total apply time of 2{,}000 changes, including merges for E (every 100 changes per role); seed-to-seed sd of p50/p95 is at most 0.004\,ms.}
+\label{tab:ae}
+\begin{tabular}{@{}llrrrrrr@{}}\toprule
+arm & stream & leased & fallback & p50 & p95 & auth & update (ms) \\
+\midrule
+A & revoke & 0.2\% & 99.8\% & 0.291 & 0.307 & 0 & 0.5 \\
+A & grant & 0.3\% & 99.7\% & 0.308 & 0.325 & 0 & 2.1 \\
+A & 50/50 & 0.2\% & 99.8\% & 0.300 & 0.315 & 0 & 1.9 \\
+B & revoke & 100.0\% & 0.0\% & 0.097 & 0.110 & 0 & 0.6 \\
+B & grant & 0.2\% & 99.8\% & 0.309 & 0.327 & 0 & 2.0 \\
+B & 50/50 & 0.7\% & 99.3\% & 0.299 & 0.314 & 0 & 1.9 \\
+C & revoke & 100.0\% & 0.0\% & 0.097 & 0.111 & 0 & 0.7 \\
+C & grant & 100.0\% & 0.0\% & 0.106 & 0.122 & 0 & 2.1 \\
+C & 50/50 & 100.0\% & 0.0\% & 0.103 & 0.117 & 0 & 2.3 \\
+C & 50/50 + hole & 100.0\% & 0.0\% & 0.101 & 0.115 & 149 & 1.9 \\
+D & revoke & 100.0\% & 0.0\% & 0.097 & 0.110 & 0 & 0.7 \\
+D & grant & 100.0\% & 0.0\% & 0.106 & 0.121 & 0 & 2.1 \\
+D & 50/50 & 100.0\% & 0.0\% & 0.102 & 0.116 & 0 & 1.9 \\
+D & 50/50 + hole & 3.2\% & 96.8\% & 0.300 & 0.315 & 0 & 1.9 \\
+E & revoke & 100.0\% & 0.0\% & 0.097 & 0.111 & 0 & 2241.6 \\
+E & grant & 100.0\% & 0.0\% & 0.103 & 0.118 & 0 & 2422.2 \\
+E & 50/50 & 100.0\% & 0.0\% & 0.101 & 0.114 & 0 & 2268.9 \\
+\bottomrule\end{tabular}\end{table*}
+
+\begin{table}[t]\centering\footnotesize
+\caption{Five arms, 1M Uniform, head-10, $K{=}10$, 1{,}000 changes, 4R+1W, three seeds (mean$\pm$sd). The first four are one runtime (\texttt{arms\_e1\_20261107/}); the pin-without-log arm is from the 11-08 rerun (\texttt{arms\_e1\_v2\_20261108/}) and is not on the same seeds.}
+\label{tab:arms}
+\begin{tabular}{@{}lrrr@{}}\toprule
+arm & p50 (ms) & p95 (ms) & missing \\\midrule
+exact & 0.0438$\pm$0.0007 & 0.0640 & 0 \\
+static & 0.0318$\pm$0.0001 & 0.0392 & 3530 \\
+unversioned & 0.0327$\pm$0.0000 & 0.0403 & 2 \\
+lease & 0.0218$\pm$0.0001 & 0.0253 & 0 \\
+pin, no log$^\dagger$ & 0.0462$\pm$0.0002 & 0.0498 & 0 \\
+\bottomrule\end{tabular}\end{table}
+
+\begin{table}[t]\centering\footnotesize
+\caption{Merge: 2k vs 10k changes (head-10, 50/50 stream, 3 seeds). The 2k E rows are measured with the same cadence (\texttt{long2k}). RSS is an upper bound: the harness does not reclaim old leases, so E includes stale graphs.}
+\label{tab:merge}
+\begin{tabular}{@{}lrrrrr@{}}\toprule
+policy & merges & update & p95 @2k & p95 @10k & RSS \\\midrule
+D (no merge) & 0 & 0.01\,s & 0.116 & 0.136 & 698\,MB \\
+E (m{=}500) & 16 & 2.43\,s & 0.116 & 0.125 & 799\,MB \\
+E (m{=}200) & 46 & 6.88\,s & 0.117 & 0.116 & 985\,MB \\
+\bottomrule\end{tabular}\end{table}
+
+\begin{table}[t]\centering\footnotesize
+\caption{The p95 cliff. Same $K{=}100$ build, three query mixes whose top-100 roles carry 90\%, 95\% and 99\% of the queries; p95 stays in the exact population until the fallback share drops below 5\%.}
+\label{tab:quantile}
+\begin{tabular}{@{}lrrrr@{}}\toprule
+top-100 mass & $p_L$ & p50 & p95 & $T_F$ \\\midrule
+90\% & 0.899 & 0.119 & 0.304 & 0.304 \\
+95\% & 0.950 & 0.119 & 0.280 & 0.304 \\
+99\% & 0.992 & 0.118 & 0.132 & 0.303 \\
+\bottomrule\end{tabular}\end{table}
+

@@ -20,21 +20,22 @@ on the three hosts was `0caeb02f1cc236dbc1c97391dae37013`.
 | Lease online service timing, 30k queries | `results/lease_online_fair30k_20261111/` |
 | Curator online 30k, 1R+1W, role49, 3 seeds | `results/curator_online_fair2_20261111/` |
 | ACORN online, fair protocol | `results/acorn_online_fair30k_20261111/` |
-| Lease online, service timing | `results/lease_online_fair_20261111/` |
 | Fig. 3 source JSON | `mechanism/results/arms_20261104/` |
-| Curator online 1R+1W | `results/curator_online_fair_20261111/` |
 | OpenAlex ACL table | `results/oa_acl_20261107/` |
 | OpenAlex churn replay | `results/oa_replay_20261107/` |
 | SIFT10M / 768d records | `results/sift10m_*`, `results/real10m_768_20261107/`, `results/real768_1m_20261107/` |
 | Per-role table / certified matrix | `results/p4_20261107/`, `results/certified_20261108/` |
 | 10M sweep | `results/sweep10m_20261106/` |
+| Table I(B), six-arm certificate matrix, 3 seeds | `results/cert_matrix_3seed_20261111/` |
+| Online probe inputs (30k queries, qroles) | `results/online30k_inputs/` |
+| Boundary sweep A-E (supplement) | `boundary/results/` |
 
 Key ratios (p50, same host): ACORN ef=32 1.20--1.26 (Xeon), 1.01 (Ryzen),
 1.38 (Gold); ACORN ef=256 6.91--7.12, 6.12, 7.34; Curator se=800 3.70--3.75,
 3.28, 3.96 instrumented, and 2.09--2.70 precomputed; Curator se=3200 23.1
 (Xeon) and 22.0 (Gold) instrumented, 23.1/14.5/22.0 precomputed.
 
-| Table IV (coverage arms) | `results/arms_cov_20261108/` |
+| Predicate matrix, Fig. 2(d) and the rho boundary | `results/arms_cov_20261108/` |
 | Five-arm table, rotated order (3 seeds) | `results/arms_rotated_20261110/` |
 | Fixed-W sweep (budget x graph, 36 cells) | `results/fixed_w_20261110/` |
 | 1M certificate suite | `results/e0_certified_1m_20261109/` |

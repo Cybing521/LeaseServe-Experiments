@@ -1,0 +1,10 @@
+tag=long_E_m500_s2 arm=E aggr=50 drop_every=0 merge_every=500 seed=2 n=1000000 dim=128 nq=2000 k=10 K=10 changes=10000 threads=4 mfac=15
+reads=48000 leased=48000 fallbacks=0 unpromoted=0 fallback_rate=0.0000 leased_rate=1.0000
+p50=0.1076 p95=0.1261 p99=0.1332 mean=0.1076
+lease_p50=0.1076 lease_p95=0.1261 lease_mean=0.1076 lease_reads=48000
+exact_p50=0.0000 exact_p95=0.0000 exact_mean=0.0000 exact_reads=0
+missing=0 auth=0 leaks=0 returned=480000
+applied=10000 update_total_ms=2538.3033 update_p50_ms=0.0004 update_p95_ms=0.0010 merges=17 merge_total_ms=2532.7089
+dist_comps=597483
+prof_search_ms=4510.1503 prof_post_ms=306.9634
+rss_mb=803.4570 build_ms=1403.0497 matfac=0.0500 mat_docs=50000 ring_rows=5024 ever_docs=55024

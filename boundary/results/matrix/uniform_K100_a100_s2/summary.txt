@@ -1,0 +1,10 @@
+tag=mat_uniform_K100_a100_s2 arm=D aggr=100 drop_every=0 merge_every=0 seed=2 n=1000000 dim=128 nq=2000 k=10 K=100 changes=2000 threads=4 mfac=15
+reads=6000 leased=1449 fallbacks=0 unpromoted=4551 fallback_rate=0.0000 leased_rate=0.2415
+p50=0.3026 p95=0.3196 p99=0.3255 mean=0.2618
+lease_p50=0.1264 lease_p95=0.1388 lease_mean=0.1241 lease_reads=1449
+exact_p50=0.3070 exact_p95=0.3207 exact_mean=0.3056 exact_reads=4551
+missing=0 auth=0 leaks=0 returned=60000
+applied=2000 update_total_ms=1.6318 update_p50_ms=0.0008 update_p95_ms=0.0013 merges=0 merge_total_ms=0.0000
+dist_comps=75279
+prof_search_ms=165.8775 prof_post_ms=7.6206
+rss_mb=2295.6719 build_ms=14072.5742 matfac=0.5000 mat_docs=500000 ring_rows=2000 ever_docs=502000

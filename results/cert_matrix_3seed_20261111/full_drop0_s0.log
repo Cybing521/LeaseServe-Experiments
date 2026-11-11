@@ -1,0 +1,2 @@
+split lease_reads=200 lease_p50=0.45259 lease_p95=4.28712 exact_reads=0 exact_p50=0 exact_p95=0
+certified build_s=113.455 reads=200 p50=0.45259 p95=4.28712 p99=9.68003 leaks=0 missing=3 auth=0 cert_fallbacks=0 wal_refused=0 unpromoted_refused=0 merges=0 hist_rows=200 cur_total=772232 replay_s=0 state_mismatch=-1 visible_total=-1 straddled=29 lease_retries=0 regrant_violations=0 live_mismatch=0 promotions=0 promote_ms=0

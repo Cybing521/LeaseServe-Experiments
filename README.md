@@ -1,6 +1,6 @@
 # LeaseServe Experiments
 
-The written supplement (20 pages) is at
+The written supplement (16 pages) is at
 https://github.com/Cybing521/LeaseServe-Supplement
 
 Experiment code, ACL inputs, and raw results for coverage-certified vector-search
@@ -15,13 +15,21 @@ cpp/                     C++ kernel, baseline drivers, ACL inputs
   acorn_acl.cpp          ACORN driver used for the 10k table
   curator_acl.cpp        Curator driver used for the 10k table
   curator_acl_precomputed.cpp  same, precomputed-truth protocol control
+  exact_concurrent*.cpp  AVX-512 exact-scan path of IV-a
+  arms_compare*.cpp      five-arm and four-arm same-runtime comparisons
+  veda_lattice.cpp       Veda-style lattice baseline
+  source_snapshots/      kernel snapshot that produced the official rows, plus its diff
   gen_erbac_acl.py       ERBAC ACL generator
   acl/erbac200k/         roles.bin, qroles_10000.bin, qroles_all.bin
+  test/                  tiny fixture that the service tests use
   third_party/hnswlib/   stock hnswlib headers (MIT)
+hnswlib_fix/             patch for ASan/TSan builds only (one header, see the paper's IV-d)
+boundary/                controlled A-E boundary harness and its raw matrices
 mechanism/               test and statistics scripts
 service/                 WAL sequencer and its lifecycle tests
 results/                 raw run outputs (summary.txt, cmd.txt, logs)
 scripts/                 reproduction shell scripts
+MANIFEST.md              result -> claim index
 ```
 
 ## Build
@@ -30,6 +38,19 @@ scripts/                 reproduction shell scripts
 g++ -O3 -march=native -std=c++17 -I cpp/third_party \
     cpp/lease_certified.cpp -o lease_certified -pthread
 ```
+
+Tests, from the repository root (`lease_certified` built as above):
+
+```
+python3 mechanism/script_regression.py --bin ./lease_certified   # 23 checks
+python3 mechanism/e0_contract_tests.py                           # 9
+python3 mechanism/e0_certified_tests.py                          # 14
+python3 service/test_promotion_restart.py --bin ./lease_certified # 6
+python3 service/test_wal_recovery.py --bin ./lease_certified      # 18
+```
+
+These scripts locate the tree in either layout (`experiments/cpp/...` in the paper's
+project, `cpp/...` here), so the same files run in both.
 
 Curator's incremental grant/revoke path is measured in
 `results/curator_incremental_20261110/` (driver and log). The online probe is single-role

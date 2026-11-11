@@ -19,8 +19,21 @@ import tempfile
 import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
-FIX = os.path.join(ROOT, "experiments", "cpp", "test")
+
+
+def _project_root(here):
+    """Layout-agnostic root: the project tree is either <root>/experiments/<part>
+    (paper + package) or <root>/<part> (the public experiments repository)."""
+    for depth in (1, 2):
+        root = os.path.abspath(os.path.join(here, *([os.pardir] * depth)))
+        for sub in (("experiments", "cpp"), ("cpp",)):
+            if os.path.isdir(os.path.join(root, *sub)):
+                return root, os.path.join(root, *sub)
+    return os.path.abspath(os.path.join(here, os.pardir, os.pardir)), None
+
+
+ROOT, CPP = _project_root(HERE)
+FIX = os.path.join(CPP or os.path.join(ROOT, "experiments", "cpp"), "test")
 
 
 def free_port():
