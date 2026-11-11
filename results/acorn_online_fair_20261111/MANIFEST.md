@@ -20,3 +20,12 @@ Protocol: warmup over all 10k -> barrier -> 50 changes at 30 ms; 3 seeds.
 
 All updates finish before the ACORN read phase ends (`upd_last` 1.47 s, `read_last` 2.75--10.5 s).
 Updates are not byte-identical to the lease stream; same count and cadence.
+
+## Artifact hashes
+
+- source `acorn_online_fair.cpp`: `e6d99448437185db7debf2a66fcbfa44c006f9d7fc9f06d0b3cf5babb1629f45`
+- binary `acorn_fair4`: `8b2c240e44ef0a85de8e8b4ba78677811b5ca1518bf5caaee4835ff6e16fb480`
+- `qroles_r43.bin` (10,000 x role 49): `4a7a28313ff298da72218e598a7b8b980c9a0b49314783d6709bb2b186c45504`
+
+`qroles_r43.bin` is named after the old role-43 file but contains role 49, the churn role; this is
+the file used for all six ACORN runs and the three lease runs.
