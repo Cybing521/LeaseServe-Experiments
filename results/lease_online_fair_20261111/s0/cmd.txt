@@ -1,2 +1,0 @@
-./lease_fair /root/work/icde/data/sift1m/base.f32 experiments/results/ab_stream_official10k_20261109/queries10k_real.f32 experiments/results/ab_stream_official10k_20261109/roles.bin qroles_r43.bin 200000 128 10000 10 10 50 1 0 leasefair4/s0 15
-env CHANGE_US=30000 DELTA_CAP=4096 MERGE_EVERY=0 DROP_GRANT=0 CERT=1 WRITERS=1 MMAX=5000 WARMUP=1 SELFCHECK=0
