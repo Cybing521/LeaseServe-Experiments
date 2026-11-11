@@ -43,8 +43,8 @@ int main(int argc,char**argv){
   std::thread writer([&]{ready++;while(!go){};std::mt19937 wr(seed);
     for(int c=0;c<50;c++){auto u0=Clock::now();bool g=(wr()%2)==0;int doc;
       {std::unique_lock<std::shared_mutex>lk(mu);
-       if(g){doc=(int)(wr()%n); if(!live[doc]){live[doc]=1;members.push_back(doc);granted++;index.grant_access(doc,role);}}
-       else{ if(members.empty()){continue;} size_t i=wr()%members.size();doc=members[i]; if(live[doc]){live[doc]=0;members[i]=members.back();members.pop_back();revoked++;index.revoke_access(doc,role);}}
+       if(g){doc=(int)(wr()%n); if(!live[doc]){live[doc]=1;members.push_back(doc);ids[role].push_back(doc);granted++;index.grant_access(doc,role);}}
+       else{ if(members.empty()){continue;} size_t i=wr()%members.size();doc=members[i]; if(live[doc]){live[doc]=0;members[i]=members.back();members.pop_back();auto it=std::find(ids[role].begin(),ids[role].end(),(int32_t)doc);if(it!=ids[role].end())ids[role].erase(it);revoked++;index.revoke_access(doc,role);}}
       }
       auto u1=Clock::now();{std::lock_guard<std::mutex>g2(mtx);ums.push_back(std::chrono::duration<double,std::milli>(u1-u0).count());upd_iv.emplace_back(std::chrono::duration<double>(u0-t_origin).count(),std::chrono::duration<double>(u1-t_origin).count());}
       std::this_thread::sleep_for(std::chrono::milliseconds(30));}});
