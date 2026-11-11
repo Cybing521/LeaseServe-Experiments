@@ -21,3 +21,14 @@ SKIP_VERIFY=1 CHANGE_US=30000 WARMUP=1 CERT=1 WRITERS=1 MMAX=5000 \
 
 `hist_rows=50` in every seed; all 50 changes land inside the 1.66 s read phase. `verified=0`,
 so `missing=0` is the disabled-oracle placeholder, not an online recheck.
+
+## Online verification (same 30k sequence, SKIP_VERIFY unset)
+
+| seed | p50 (polluted) | p95 | p99 | missing | auth | leaks |
+|---:|---:|---:|---:|---:|---:|---:|
+| 0 | 0.087785 | 0.106720 | 0.121698 | 129 / 300,000 | 0 | 0 |
+| 1 | 0.085771 | 0.102782 | 0.111950 | 129 / 300,000 | 0 | 0 |
+| 2 | 0.088415 | 0.104286 | 0.111419 | 129 / 300,000 | 0 | 0 |
+
+Recall = 1 - 129/300,000 = 0.99957. The latency in this table is polluted by the per-query exact
+oracle and is not used; service latency comes from the SKIP_VERIFY run above.

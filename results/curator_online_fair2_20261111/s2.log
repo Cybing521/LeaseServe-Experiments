@@ -1,0 +1,2 @@
+build_s=26.3605
+curator_online n=200000 nq=30000 k=10 ef=3200 changes=50 threads=1 p50=1.71544 p95=1.99156 p99=2.16153 updates=50 u_p99=1.7597 overlap_reads=97 overlapping_updates=49 granted=26 revoked=20 missing=2 truth_checked=5000 recall=0.9996
