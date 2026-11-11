@@ -1,24 +1,22 @@
 # ACORN online, fair protocol (2026-11-11)
 
-Host: Ryzen 9 9950X, 1 reader + 1 writer, 200k SIFT / ERBAC, one hot role (the query role).
-Driver: `acorn_online_fair.cpp` (writer priority; member pool fixed; e2e timer includes bitmap
-copy and ACL lock; search-only timer reported separately).
+Host: Ryzen 9 9950X, 1 reader + 1 writer, 200k SIFT / ERBAC. **All 10,000 queries target the
+churn role** (role 49), so every query sees the update stream; earlier 10-role runs diluted it.
 
-Protocol: untimed warmup over all 10k queries -> barrier -> 50 changes at 30 ms. Truth: 500
-query IDs drawn uniformly at random from the 10k (not every 200th), each checked against an exact
-scan of its pinned bitmap; 5,000 returned positions per run. 3 seeds.
+Driver: `acorn_online_fair.cpp`: writer priority; `members` updated on grant; 500 random query
+IDs (not every 200th) checked against their pinned bitmap; e2e timer includes bitmap copy + ACL
+lock, search-only timer reported separately.
 
-| run | p50 search | p95 | e2e p50 | recall | updates during read |
+Protocol: warmup over all 10k -> barrier -> 50 changes at 30 ms; 3 seeds.
+
+| run | p50 search | p95 | e2e p50 | recall | overlaps |
 |---|---:|---:|---:|---:|---:|
-| ef32 s0 | 0.1790 | 0.2165 | 0.1818 | 0.9460 | 38/50 |
-| ef32 s1 | 0.1797 | 0.2175 | 0.1823 | 0.9438 | 38/50 |
-| ef32 s2 | 0.1800 | 0.2170 | 0.1820 | 0.9448 | 38/50 |
-| ef256 s0 | 0.9248 | 1.0721 | 0.9285 | 0.9994 | 45/50 |
-| ef256 s1 | 0.9315 | 1.0798 | 0.9352 | 0.9992 | 48/50 |
-| ef256 s2 | 1.1299 | 1.2703 | 1.1347 | 0.9992 | 47/50 |
+| ef32 s0 | 0.17525 | 0.21602 | 0.17769 | 0.9484 | 38/50 |
+| ef32 s1 | 0.18756 | 0.23271 | 0.19005 | 0.9412 | 30/50 |
+| ef32 s2 | 0.18847 | 0.23510 | 0.19085 | 0.9540 | 39/50 |
+| ef256 s0 | 0.93754 | 1.13201 | 0.94007 | 0.9998 | 42/50 |
+| ef256 s1 | 0.79657 | 0.98828 | 0.79892 | 0.9992 | 44/50 |
+| ef256 s2 | 0.79823 | 0.98597 | 0.80067 | 0.9988 | 46/50 |
 
-Updates all complete before the read phase ends (`upd_last` 1.47 s, `read_last` 2.7--12.3 s).
-`overlap_reads` is the number of read intervals intersecting an update interval; because the
-update critical section is microseconds, this is a conservative lower bound (38--48 of 50).
-
-The random change stream is not byte-identical to the lease stream; same count and 30 ms cadence.
+All updates finish before the ACORN read phase ends (`upd_last` 1.47 s, `read_last` 2.75--10.5 s).
+Updates are not byte-identical to the lease stream; same count and cadence.
