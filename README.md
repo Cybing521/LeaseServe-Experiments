@@ -1,11 +1,20 @@
 # LeaseServe Experiments
 
-The written supplement (16 pages) is at
-https://github.com/Cybing521/LeaseServe-Supplement
-
 Experiment code, ACL inputs, and raw results for coverage-certified vector-search
-leases (ICDE 2027 submission). This repository contains no manuscript source or
-paper text.
+leases (ICDE 2027 Research Track submission).
+
+## Supplemental material
+
+This repository is the primary entry point for the submission's artifact.
+
+- **Code, ACL inputs, raw results, reproduction scripts** — here. `MANIFEST.md`
+  maps every table in the paper to the directory that produced it.
+- **Written supplement, 16 pages of measurement detail** —
+  <https://github.com/Cybing521/LeaseServe-Supplement>
+
+The paper is self-contained: all lemmas, theorems and propositions are stated and
+argued in its 12 pages, and the supplement repeats none of them. This repository
+contains no manuscript source or paper text.
 
 ## Layout
 
