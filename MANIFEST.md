@@ -20,6 +20,7 @@ on the three hosts was `0caeb02f1cc236dbc1c97391dae37013`.
 | ACORN online, fair protocol | `results/acorn_online_fair_20261111/` |
 | Lease online, service timing | `results/lease_online_fair_20261111/` |
 | Fig. 3 source JSON | `mechanism/results/arms_20261104/` |
+| Curator online 1R+1W | `results/curator_online_fair_20261111/` |
 | OpenAlex ACL table | `results/oa_acl_20261107/` |
 | OpenAlex churn replay | `results/oa_replay_20261107/` |
 | SIFT10M / 768d records | `results/sift10m_*`, `results/real10m_768_20261107/`, `results/real768_1m_20261107/` |
