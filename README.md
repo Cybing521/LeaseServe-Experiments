@@ -32,8 +32,9 @@ g++ -O3 -march=native -std=c++17 -I cpp/third_party \
 ```
 
 Curator's incremental grant/revoke path is measured in
-`results/curator_incremental_20261110/` (driver and log); ACORN online is not shipped as a
- result because its sampling/interval record is not used in the paper.
+`results/curator_incremental_20261110/` (driver and log); the fair ACORN online control is
+ `results/acorn_online_fair_20261111/` (3 seeds, 30 ms, stratified truth sample), with the lease
+ control at `results/lease_online_fair_20261111/`.
 
 The kernel uses AVX-512 for the exact scan; `-march=native` on a non-AVX-512 host
 builds the scalar fallback. A budget guard answers exactly when `phi > 1-1/rho` or

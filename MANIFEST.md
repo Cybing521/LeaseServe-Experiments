@@ -17,6 +17,8 @@ on the three hosts was `0caeb02f1cc236dbc1c97391dae37013`.
 | Host diagnosis (mfac, exact) | `results/ab_stream_official10k_20261109/diagnostics/` |
 | Budget guard (k=1000, phi=95%) | `results/ab_stream_official10k_20261109/budget_guard/` |
 | Curator incremental path (N sweep) | `results/curator_incremental_20261110/` |
+| ACORN online, fair protocol | `results/acorn_online_fair_20261111/` |
+| Lease online, service timing | `results/lease_online_fair_20261111/` |
 | Fig. 3 source JSON | `mechanism/results/arms_20261104/` |
 | OpenAlex ACL table | `results/oa_acl_20261107/` |
 | OpenAlex churn replay | `results/oa_replay_20261107/` |
