@@ -63,9 +63,31 @@ project, `cpp/...` here), so the same files run in both.
 
 Curator's incremental grant/revoke path is measured in
 `results/curator_incremental_20261110/` (driver and log). The online probe is single-role
-(role 49), 1R+1W, 30 ms: ACORN `results/acorn_online_fair30k_20261111/`, lease
-`results/lease_online_fair30k_20261111/`, Curator `results/curator_online_fair2_20261111/`.
+(role 49), 1R+1W, 30 ms: ACORN `results/acorn_online_fair30k_20261111/` (timing-only rerun
+`results/acorn_online_fair30k_clean_20261111/`, sample control
+`results/acorn_online_fair30k_samplectl_20261111/`), Curator
+`results/curator_online_fair2_20261111/`, and the lease run the supplement reports,
+`results/lease_online_fair30k_k1_20261111/` (K=1, so all 50 changes hit the queried role).
 It is not a 10-role workload or long-term ACL drift.
+
+That lease run ships each read's pin and returned documents (`k1_30_s<seed>.txt`) and the
+committed change stream (`k1_chg_s<seed>.txt`), so recall is recomputed offline, without
+kernel code:
+
+```
+python3 mechanism/replay_online_truth.py base.f32 queries_30k.f32 \
+    cpp/acl/erbac200k/roles.bin results/lease_online_fair30k_k1_20261111/k1_30_s0.txt \
+    results/lease_online_fair30k_k1_20261111/k1_chg_s0.txt
+```
+
+It folds the log into V(r,e) per pin in float64, scores ties by distance, and attributes a
+miss to `auth` only when the document is not a node of the materialized graph (the run does
+no merge). `results/lease_online_fair30k_k1_20261111/MANIFEST.md` records the three seeds,
+the timing, and why the earlier float32 script reported 140/142/146 instead of 130/129/129.
+
+`cpp/source_snapshots/README.md` maps each reported row to the exact source file (sha256)
+that produced it and lines Algorithm 1 up against the kernel's reader. The one-reader 10k
+row (0.266 ms) ships with its command in `results/review_fix_20261109/lease_1r_official10k/`.
 
 The kernel uses AVX-512 for the exact scan; `-march=native` on a non-AVX-512 host
 builds the scalar fallback. A budget guard answers exactly when `phi > 1-1/rho` or

@@ -356,6 +356,8 @@ struct Wal {
 
 static std::atomic<long> g_cert_fallbacks{0}, g_budget_fallbacks{0}, g_merges{0}, g_retries{0}, g_straddled{0};
 static std::atomic<long> g_wal_refused{0};
+static std::mutex g_ct_mu;                     // guards g_change_tp
+static std::vector<Clock::time_point> g_change_tp;  // wall time of every applied change
 static std::atomic<long> g_regrant_violations{0};   // REGRANT_CHECK=1
 static std::atomic<long> g_promotions{0};           // cold-role promotions
 static std::atomic<long> g_promote_us{0};           // total time spent building promoted roles
@@ -1357,6 +1359,7 @@ int main(int argc, char** argv) {
             if (victim >= 0) changed_doc = publish_revoke(st, r, victim);
         }
         st->changes_since_merge++;
+        { std::lock_guard<std::mutex> lkct(g_ct_mu); g_change_tp.push_back(Clock::now()); }
         const int done = changes_done.fetch_add(1, std::memory_order_relaxed) + 1;
         if (!readers_go.load(std::memory_order_relaxed) && done >= warmup) {
             readers_go.store(true, std::memory_order_release);
@@ -1412,6 +1415,7 @@ int main(int argc, char** argv) {
                     publish_revoke(st, op.role, op.doc);
                 }
                 st->changes_since_merge++;
+        { std::lock_guard<std::mutex> lkct(g_ct_mu); g_change_tp.push_back(Clock::now()); }
                 const int done = changes_done.fetch_add(1, std::memory_order_relaxed) + 1;
                 if (!readers_go.load(std::memory_order_relaxed) && done >= warmup)
                     readers_go.store(true, std::memory_order_release);
@@ -1471,6 +1475,7 @@ int main(int argc, char** argv) {
     // ---- readers -----------------------------------------------------------
     std::vector<std::vector<int>> gots(nq);
     std::vector<double> lat(nq, 0.0);
+    std::vector<Clock::time_point> t_read(nq);
     std::vector<std::vector<double>> lat_exact_all(threads), lat_lease_all(threads);
     std::vector<Clock::time_point> t_start(threads), t_end(threads);
     std::vector<std::thread> readers;
@@ -1483,6 +1488,7 @@ int main(int argc, char** argv) {
             const int lo = t * nq / threads;
             const int hi = (t + 1) * nq / threads;
             for (int q = lo; q < hi; ++q) {
+                t_read[q] = Clock::now();
                 int role = 0;
                 const bool used_lease = query_one(q, gots[q], vpins[q], lat[q], role);
                 if (used_lease)
@@ -1586,6 +1592,27 @@ int main(int argc, char** argv) {
         std::ofstream lf(lpath);
         for (int q = 0; q < nq; ++q) lf << q << " " << lat[q] << "\n";
     }
+    // In-window / post-window split: a read is "in window" if it started no later
+    // than the last applied change.  Single-reader runs keep this exact; multi-reader
+    // runs use each thread's own start time, which is the same criterion.
+    double upd_last_s = 0.0;
+    long inwin_n = 0;
+    std::vector<double> inwin_lat, post_lat;
+    {
+        Clock::time_point last{};
+        bool have = false;
+        {
+            std::lock_guard<std::mutex> lkct(g_ct_mu);
+            for (auto& tp : g_change_tp) if (!have || tp > last) { last = tp; have = true; }
+        }
+        if (have) {
+            for (int q = 0; q < nq; ++q) {
+                if (t_read[q] <= last) { inwin_lat.push_back(lat[q]); ++inwin_n; }
+                else post_lat.push_back(lat[q]);
+            }
+            upd_last_s = std::chrono::duration<double>(last - t_start[0]).count();
+        }
+    }
     {
         std::ofstream sm(outdir + "/summary.txt");
         sm << "certified reads=" << reads
@@ -1604,7 +1631,10 @@ int main(int argc, char** argv) {
            << " hist_rows=" << hist_rows << " log_len=" << log_total
            << " cur_total=" << cur_total << " replay_s=" << replay_s
            << " state_mismatch=" << state_mismatch << " visible_total=" << visible_total
-           << " straddled=" << straddled << "\n";
+           << " straddled=" << straddled
+           << " upd_last=" << upd_last_s << " inwin_n=" << inwin_n
+           << " inwin_p50=" << pctl(inwin_lat, 0.50) << " inwin_p95=" << pctl(inwin_lat, 0.95)
+           << " post_p50=" << pctl(post_lat, 0.50) << " post_p95=" << pctl(post_lat, 0.95) << "\n";
     }
     {
         std::ofstream cm(outdir + "/cmd.txt");

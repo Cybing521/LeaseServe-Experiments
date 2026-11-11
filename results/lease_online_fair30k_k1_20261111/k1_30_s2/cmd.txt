@@ -1,0 +1,2 @@
+./lease_online_v2 /root/work/icde/data/sift1m/base.f32 queries_30k.f32 experiments/results/ab_stream_official10k_20261109/roles.bin qroles_30k.bin 200000 128 30000 10 1 50 1 2 k1_30_s2 15
+env CHANGE_US=30000 DELTA_CAP=4096 MERGE_EVERY=0 DROP_GRANT=0 CERT=1 WRITERS=1 MMAX=5000 WARMUP=1 SELFCHECK=0

@@ -1,0 +1,30 @@
+[PASS] A1 replay+revoke: process exits 0
+[PASS] A1 replay+revoke: no authorization miss
+[PASS] A1 replay+revoke: no missing result
+[PASS] A1 replay+revoke: no certified fallback
+[PASS] A1 replay+revoke: visible == cur
+[PASS] A2 re-grant: replay exits 0
+[PASS] A2 re-grant: doc 12 is visible after replay
+[PASS] A2 re-grant: visible == cur
+[PASS] A2 re-grant: reads certified, no fallback
+[PASS] A3 replay+updates (no merge): no auth miss
+[PASS] A3 replay+updates (no merge): no missing result
+[PASS] A3 replay+updates (no merge): visible == cur
+[PASS] A4 merge+replay: no auth miss
+[PASS] A4 merge+replay: no missing result
+[PASS] A4 merge+replay: visible == cur
+[PASS] A4 merge+replay: recovery and later merges ran
+[PASS] B1 stalled WAL: process does not hang
+[PASS] B1 stalled WAL: commit refused
+[PASS] B1 stalled WAL: refused change leaves no state
+[PASS] B1 stalled WAL: reads stay exact and correct
+[PASS] B2 unreachable WAL: exits 3 before serving
+[PASS] B3 failed replay: exits 4
+[PASS] B4 unpromoted role in log: exits 5
+[PASS] B5 stalled commit: process exits 0
+[PASS] B5 stalled commit: the second commit is refused
+[PASS] B5 stalled commit: fallback returns the right answer
+[PASS] B5 stalled commit: every read falls back
+[PASS] B5 stalled commit: fallback is not blocked by the writer
+
+28 checks, ALL PASS

@@ -1,0 +1,26 @@
+# old rule: materialized = grant_v[d] <= a_L
+[PASS] cert: the lost grant is caught by an exact fallback
+[PASS] cert: no missing result
+[PASS] cert: fallback returns the true top-1
+[PASS] nocert: no fallback (the hole is silent)
+[PASS] nocert: the true top-1 is missing
+[PASS] nocert: missing is 1
+[FAIL] nocert: the miss is attributed to authorization  (auth=0.0)
+[PASS] control: certified read returns the regranted document
+[PASS] nocert_control: the log entry alone is enough
+[PASS] cert: oracle sees zero leaks
+[PASS] cert: oracle missing matches the kernel
+[PASS] cert: oracle auth matches the kernel
+[PASS] nocert: oracle sees zero leaks
+[PASS] nocert: oracle missing matches the kernel
+[FAIL] nocert: oracle auth matches the kernel  (oracle=1 kernel=0.0)
+[PASS] control: oracle sees zero leaks
+[PASS] control: oracle missing matches the kernel
+[PASS] control: oracle auth matches the kernel
+[PASS] nocert_control: oracle sees zero leaks
+[PASS] nocert_control: oracle missing matches the kernel
+[PASS] nocert_control: oracle auth matches the kernel
+[FAIL] random seed 5: the one miss is an authorization miss  (missing=1.0 auth=0.0)
+[PASS] random seed 5: oracle agrees on leaks and missing
+
+20/23 PASS

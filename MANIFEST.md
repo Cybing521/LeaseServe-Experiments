@@ -31,6 +31,10 @@ the exact derivation of each input are in [README.md](README.md#data-sources):
 | Lease online service timing, 30k queries | `results/lease_online_fair30k_20261111/` |
 | Curator online 30k, 1R+1W, role49, 3 seeds | `results/curator_online_fair2_20261111/` |
 | ACORN online, fair protocol | `results/acorn_online_fair30k_20261111/` |
+| Lease online, K=1: all 50 changes on role 49 (supplement online table) | `results/lease_online_fair30k_k1_20261111/` |
+| Online recall recomputation, per-read pins + change logs | `results/lease_online_fair30k_k1_20261111/k1_30_s*.txt`, `replay_s*.txt`, script `mechanism/replay_online_truth.py` |
+| ACORN online timing-only rerun / sample control | `results/acorn_online_fair30k_clean_20261111/`, `results/acorn_online_fair30k_samplectl_20261111/` |
+| One-reader lease, official 10k (0.266 ms) with cmd and summary | `results/review_fix_20261109/lease_1r_official10k/` |
 | Fig. 3 source JSON | `mechanism/results/arms_20261104/` |
 | OpenAlex ACL table | `results/oa_acl_20261107/` |
 | OpenAlex churn replay | `results/oa_replay_20261107/` |

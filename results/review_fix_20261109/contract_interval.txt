@@ -1,0 +1,11 @@
+[PASS] C1 a lease is usable exactly on [a_L, omega_L]
+[PASS] C2 a grant extends omega and is searchable at the new pin
+[PASS] C3 a read pinned before a grant does not see it
+[PASS] C4 a revoke advances omega without a log entry
+[PASS] C5 a lost grant freezes omega and forces an exact scan
+[PASS] C6 a merge repairs the hole and replays its suffix
+[PASS] C7 a reader pinned before a merge keeps the old lease
+[PASS] C8 a regrant after a merge keeps the old pin and the new one
+[PASS] C9 random interleaving: no leak, certified complete, fallback exact
+
+9/9 contract tests passed
